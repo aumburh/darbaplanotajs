@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darba Plānotājs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <style>
+        :root {
+            --main-bg-light: #f8f8f8; /* Light Background Color */
+            --main-bg-dark: #2c2c2c; /* Dark Background Color */
+            --primary-color: #3b82f6; /* Primary Blue Color */
+            --secondary-color: #1e40af; /* Darker Blue */
+            --button-color: #4CAF50; /* Button Green Color */
+            --hover-color: #38bdf8; /* Hover Blue Color */
+        }
+
+        body {
+            background-color: var(--main-bg-light);
+            color: #333;
+        }
+
+        .dark {
+            background-color: var(--main-bg-dark);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .card {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .card:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body class="bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text">
+    <header class="flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md">
+        <h1 class="text-xl font-bold">Darba Plānotājs</h1>
+        <input type="text" id="searchBar" placeholder="Search..." class="px-3 py-2 border rounded w-1/3 bg-gray-50 dark:bg-gray-700">
+        <div class="flex gap-4">
+            <button id="themeToggle" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded">
+                <span id="themeIcon" class="text-xl">🌙</span> <!-- Default moon icon -->
+            </button>
+            <button id="logoutButton" class="px-4 py-2 bg-red-500 text-white rounded">Izlogoties</button>
+        </div>
+    </header>
+    
+    <main class="p-4">
+        <section class="mt-6 p-4 bg-white dark:bg-gray-800 shadow-md rounded">
+            <h2 class="text-lg font-semibold">Kalendāri</h2>
+            <div id="calendarList" class="flex gap-4 mt-2">
+                <button id="addCalendar" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded">+ Pievienot kalendāru</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="calendarModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow-md">
+            <h2 class="text-lg font-semibold">Izveidot kalendāru</h2>
+            <input type="text" id="calendarName" placeholder="Kalendāra nosaukums" class="block w-full p-2 border rounded mt-2 text-black">
+            <div class="flex items-center gap-2 mt-2">
+                <input type="color" id="calendarColor" class="p-1 border rounded">
+                <div id="colorPreview" class="w-8 h-8 border rounded"></div>
+            </div>
+            <button id="saveCalendar" class="px-4 py-2 bg-blue-500 text-white rounded mt-2">Saglabāt</button>
+            <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded mt-2">Aizvērt</button>
+        </div>
+    </div>
+
+    <script>
+
+        tailwind.config ={
+            darkMode: 'class',
+        };
+
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon'); // Added icon element
+        const body = document.body;
+        const addCalendar = document.getElementById('addCalendar');
+        const calendarList = document.getElementById('calendarList');
+        const calendarModal = document.getElementById('calendarModal');
+        const closeModal = document.getElementById('closeModal');
+        const saveCalendar = document.getElementById('saveCalendar');
+        const calendarName = document.getElementById('calendarName');
+        const colorInput = document.getElementById('calendarColor');
+        const colorPreview = document.getElementById('colorPreview');
+
+        // Set initial background color based on user's preference
+        colorInput.addEventListener("input", () => {
+            colorPreview.style.backgroundColor = colorInput.value;
+        });
+
+        colorPreview.style.backgroundColor = colorInput.value;
+
+        // Theme Toggle Logic
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            // Change theme icon based on the theme
+            if (body.classList.contains('dark')) {
+                themeIcon.textContent = '🌞'; // Sun for dark mode
+            } else {
+                themeIcon.textContent = '🌙'; // Moon for light mode
+            }
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Apply saved theme on page load
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark');
+            themeIcon.textContent = '🌞'; // Sun for dark mode
+        } else {
+            themeIcon.textContent = '🌙'; // Moon for light mode
+        }
+
+        // Open calendar modal on click
+        addCalendar.addEventListener('click', () => {
+            calendarModal.classList.remove('hidden');
+        });
+
+        // Close calendar modal
+        closeModal.addEventListener('click', () => {
+            calendarModal.classList.add('hidden');
+        });
+
+        // Save calendar
+        saveCalendar.addEventListener('click', () => {
+            const name = calendarName.value.trim();
+            const color = calendarColor.value;
+
+            if (name) {
+                const newCalendar = document.createElement('div');
+                newCalendar.className = 'p-4 rounded shadow-md card'; // Added custom class for calendar card
+                newCalendar.style.backgroundColor = color;
+                newCalendar.textContent = name;
+                calendarList.appendChild(newCalendar);
+                calendarModal.classList.add('hidden');
+
+                // Reset input fields
+                calendarName.value = "";
+                calendarColor.value = "#000000"; // Default color
+                colorPreview.style.backgroundColor = "#000000";
+            }
+        });
+    </script>
+</body>
+</html>

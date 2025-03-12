@@ -9,17 +9,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     <style>
         :root {
-            --main-bg-light: #f8f8f8; /* Light Background Color */
-            --main-bg-dark: #2c2c2c; /* Dark Background Color */
-            --primary-color: #3b82f6; /* Primary Blue Color */
-            --secondary-color: #1e40af; /* Darker Blue */
-            --button-color: #4CAF50; /* Button Green Color */
-            --hover-color: #38bdf8; /* Hover Blue Color */
+            --main-bg-light: #f8f8f8;
+            --main-bg-dark: #2f334b;
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --button-color: #4CAF50;
+            --hover-color: #38bdf8;
         }
 
         body {
             background-color: var(--main-bg-light);
             color: #333;
+            transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
         }
 
         .dark {
@@ -30,6 +31,7 @@
         .btn-primary {
             background-color: var(--primary-color);
             color: #fff;
+            transition: background 0.2s ease-in-out;
         }
 
         .btn-primary:hover {
@@ -39,10 +41,21 @@
         .card {
             background-color: var(--primary-color);
             color: #fff;
+            transition: background 0.2s ease-in-out;
         }
 
         .card:hover {
             background-color: var(--secondary-color);
+        }
+
+        /* Ensure color picker opens in a fixed position */
+        #calendarColor {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            opacity: 0; /* Hide default input */
         }
     </style>
 </head>
@@ -52,7 +65,7 @@
         <input type="text" id="searchBar" placeholder="Search..." class="px-3 py-2 border rounded w-1/3 bg-gray-50 dark:bg-gray-700">
         <div class="flex gap-4">
             <button id="themeToggle" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded">
-                <span id="themeIcon" class="text-xl">🌙</span> <!-- Default moon icon -->
+                <span id="themeIcon" class="text-xl">🌙</span>
             </button>
             <button id="logoutButton" class="px-4 py-2 bg-red-500 text-white rounded">Izlogoties</button>
         </div>
@@ -68,26 +81,26 @@
     </main>
 
     <div id="calendarModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow-md">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-80">
             <h2 class="text-lg font-semibold">Izveidot kalendāru</h2>
             <input type="text" id="calendarName" placeholder="Kalendāra nosaukums" class="block w-full p-2 border rounded mt-2 text-black">
-            <div class="flex items-center gap-2 mt-2">
-                <input type="color" id="calendarColor" class="p-1 border rounded">
-                <div id="colorPreview" class="w-8 h-8 border rounded"></div>
+            <div class="flex items-center gap-3 mt-3 relative">
+                <input type="color" id="calendarColor" class="absolute">
+                <button id="colorPickerBtn" class="w-10 h-10 rounded-full border-2 border-gray-400 shadow-md transition-transform transform hover:scale-110" style="background-color: #000000;"></button>
             </div>
-            <button id="saveCalendar" class="px-4 py-2 bg-blue-500 text-white rounded mt-2">Saglabāt</button>
-            <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded mt-2">Aizvērt</button>
+            <button id="saveCalendar" class="w-full px-4 py-2 bg-blue-500 text-white rounded mt-4">Saglabāt</button>
+            <button id="closeModal" class="w-full px-4 py-2 bg-gray-300 rounded mt-2">Aizvērt</button>
         </div>
     </div>
 
     <script>
 
-        tailwind.config ={
+        tailwind.config = {
             darkMode: 'class',
         };
 
         const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon'); // Added icon element
+        const themeIcon = document.getElementById('themeIcon');
         const body = document.body;
         const addCalendar = document.getElementById('addCalendar');
         const calendarList = document.getElementById('calendarList');
@@ -96,64 +109,62 @@
         const saveCalendar = document.getElementById('saveCalendar');
         const calendarName = document.getElementById('calendarName');
         const colorInput = document.getElementById('calendarColor');
-        const colorPreview = document.getElementById('colorPreview');
-
-        // Set initial background color based on user's preference
-        colorInput.addEventListener("input", () => {
-            colorPreview.style.backgroundColor = colorInput.value;
-        });
-
-        colorPreview.style.backgroundColor = colorInput.value;
+        const colorPickerBtn = document.getElementById('colorPickerBtn');
 
         // Theme Toggle Logic
         themeToggle.addEventListener('click', () => {
             body.classList.toggle('dark');
-            // Change theme icon based on the theme
-            if (body.classList.contains('dark')) {
-                themeIcon.textContent = '🌞'; // Sun for dark mode
-            } else {
-                themeIcon.textContent = '🌙'; // Moon for light mode
-            }
+            themeIcon.textContent = body.classList.contains('dark') ? '🌞' : '🌙';
             localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
         });
 
-        // Apply saved theme on page load
         if (localStorage.getItem('theme') === 'dark') {
             body.classList.add('dark');
-            themeIcon.textContent = '🌞'; // Sun for dark mode
+            themeIcon.textContent = '🌞';
         } else {
-            themeIcon.textContent = '🌙'; // Moon for light mode
+            themeIcon.textContent = '🌙';
         }
 
-        // Open calendar modal on click
+        // Open Color Picker when clicking the button
+        colorPickerBtn.addEventListener('click', (event) => {
+            colorInput.click();
+        });
+
+        // Update Button Color on Change
+        colorInput.addEventListener("input", () => {
+            colorPickerBtn.style.backgroundColor = colorInput.value;
+        });
+
+        // Open Calendar Modal
         addCalendar.addEventListener('click', () => {
             calendarModal.classList.remove('hidden');
         });
 
-        // Close calendar modal
+        // Close Calendar Modal
         closeModal.addEventListener('click', () => {
             calendarModal.classList.add('hidden');
         });
 
-        // Save calendar
+        // Save Calendar
         saveCalendar.addEventListener('click', () => {
             const name = calendarName.value.trim();
-            const color = calendarColor.value;
+            const color = colorInput.value;
 
             if (name) {
                 const newCalendar = document.createElement('div');
-                newCalendar.className = 'p-4 rounded shadow-md card'; // Added custom class for calendar card
+                newCalendar.className = 'p-4 rounded shadow-md card flex items-center justify-center';
                 newCalendar.style.backgroundColor = color;
                 newCalendar.textContent = name;
                 calendarList.appendChild(newCalendar);
                 calendarModal.classList.add('hidden');
 
-                // Reset input fields
+                // Reset Fields
                 calendarName.value = "";
-                calendarColor.value = "#000000"; // Default color
-                colorPreview.style.backgroundColor = "#000000";
+                colorInput.value = "#000000";
+                colorPickerBtn.style.backgroundColor = "#000000";
             }
         });
+
     </script>
 </body>
 </html>

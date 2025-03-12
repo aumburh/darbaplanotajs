@@ -1,0 +1,187 @@
+:root {
+    --calendar-bg-color: #f0f8ff; /* Light blue background */
+    --text-color: #333;
+    --button-color: #4CAF50;
+    --button-hover-color: #2c6d2e;;
+    --event-bg-color: #007bff;
+    --event-text-color: #fff;
+    --header-bg-color: #007bff;
+    --header-text-color: #fff;
+    --day-hover-color: rgba(0, 123, 255, 0.1);
+    --input-border-color: #ddd;
+    --input-focus-border-color: #007bff;
+    --event-delete-btn-color: #fff;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    height: 100vh;
+    background-color: #f9f9f9;
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.calendar-container {
+    width: 80%;
+    max-width: 1000px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--header-bg-color);
+    padding: 10px 20px;
+    color: var(--header-text-color);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.calendar-controls button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--header-text-color);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.calendar-controls button:hover {
+    color: var(--header-text-color); /* Prevent changing text color on hover */
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.day {
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: var(--text-color);
+}
+
+.day:hover {
+    background-color: var(--day-hover-color);
+}
+
+.day.has-event {
+    background-color: var(--calendar-bg-color);
+    color: var(--event-text-color);
+    font-weight: bold;
+}
+
+.day.has-event:hover {
+    background-color: var(--event-bg-color);
+}
+
+.day.selected {
+    background-color: var(--event-bg-color) !important;
+    color: var(--event-text-color);
+}
+
+#event-form {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+#event-form input {
+    padding: 10px;
+    font-size: 16px;
+    width: 80%;
+    border: 2px solid var(--input-border-color);
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+#event-form input:focus {
+    border-color: var(--input-focus-border-color);
+}
+
+#event-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: var(--button-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#event-form button:hover {
+    background-color: var(--button-hover-color);
+    transform: scale(1.1);  /* Slightly smaller on hover */
+}
+
+#events {
+    margin-top: 20px;
+}
+
+.event {
+    background-color: var(--event-bg-color);
+    color: var(--event-text-color);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.event:hover {
+    transform: scale(1.01);
+    filter: brightness(1.1); /* Lighter background for better contrast */
+}
+
+.event button {
+    background: none;
+    border: none;
+    color: var(--event-delete-btn-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.event button:hover {
+    color: #b6b6b6;
+}
+
+.day-of-week {
+    font-weight: bold;
+    text-align: center;
+    color: var(--calendar-bg-color);
+}
+
+.selected {
+background-color: var(--event-bg-color) !important;
+color: var(--event-text-color);
+filter: brightness(1.3); /* Lighter background for better contrast */
+border-radius: 8px; /* Rounded corners */
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Soft shadow */
+transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition for color and transform */
+transform: scale(1.05); /* Slight zoom-in effect */
+}
+
+.selected:hover {
+transform: scale(1.1); /* Slight zoom effect when hovered */
+box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+}

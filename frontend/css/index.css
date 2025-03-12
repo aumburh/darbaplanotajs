@@ -1,0 +1,53 @@
+:root {
+    --main-bg-light: #f8f8f8;
+    --main-bg-dark: #2f334b;
+    --primary-color: #3b82f6;
+    --secondary-color: #1e40af;
+    --button-color: #4CAF50;
+    --hover-color: #38bdf8;
+}
+
+body {
+    background-color: var(--main-bg-light);
+    color: #333;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.dark {
+    background-color: var(--main-bg-dark);
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+    transition: background 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+}
+
+.card {
+    background-color: var(--primary-color);
+    color: #fff;
+    transition: background 0.2s ease-in-out;
+    font-weight: bold;  /* Fix boldness by using normal weight */
+}
+
+
+.card:hover {
+    background-color: var(--secondary-color);
+    font-weight: bold;  /* Bold text on hover */
+}
+
+
+/* Ensure color picker opens in a fixed position */
+#calendarColor {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    opacity: 0; /* Hide default input */
+}

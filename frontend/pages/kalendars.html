@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="/css/calendar.css">
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar-controls" id="calendar-controls">
+            <button id="back-btn" class="px-6 py-3 rounded-lg shadow-lg transform transition duration-200 ease-in-out hover:scale-105">Atpakaļ</button>
+            <button id="prev-month" class="px-6 py-3 rounded-lg shadow-lg transform transition duration-200 ease-in-out hover:scale-105">←</button>
+            <span id="month-year"></span>
+            <button id="next-month" class="px-6 py-3 rounded-lg shadow-lg transform transition duration-200 ease-in-out hover:scale-105">→</button>
+        </div>
+        <div class="calendar"></div>
+        <div id="event-form">
+            <input type="text" id="event-input" placeholder="Add event">
+            <button id="add-event-btn">Add</button>
+        </div>
+        <div id="events"></div>
+    </div>
+    <script src="/js/calendar.js"></script>
+</body>
+</html>

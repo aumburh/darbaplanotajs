@@ -31,6 +31,18 @@ const CalendarSchema = new mongoose.Schema({
 
 const Calendar = mongoose.model('Calendar', CalendarSchema);
 
+// Event Schema
+const EventSchema = new mongoose.Schema({
+    calendarId: { type: mongoose.Schema.Types.ObjectId, ref: 'Calendar' },
+    day: Number,
+    month: Number,
+    year: Number,
+    eventText: String,
+    createdAt: { type: Date, default: Date.now }
+});
+
+const Event = mongoose.model('Event', EventSchema);
+
 // API Routes
 
 // Create a new calendar
@@ -50,7 +62,7 @@ app.get('/calendars', async (req, res) => {
     res.json(calendars);
 });
 
-// Get a single calendar by ID (API Route)
+// Get a single calendar by ID
 app.get('/api/kalendars/:id', async (req, res) => {
     try {
         const calendar = await Calendar.findById(req.params.id);
@@ -68,6 +80,36 @@ app.get('/kalendars/:id', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/kalendars.html'));
 });
 
+// Create a new event
+app.post('/api/events', async (req, res) => {
+    try {
+        const newEvent = new Event(req.body);
+        await newEvent.save();
+        res.json(newEvent);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get events for a calendar
+app.get('/api/events/:calendarId', async (req, res) => {
+    try {
+        const events = await Event.find({ calendarId: req.params.calendarId });
+        res.json(events);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete an event by ID
+app.delete('/api/events/:id', async (req, res) => {
+    try {
+        await Event.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Event deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Update a calendar by ID
 app.put('/calendars/:id', async (req, res) => {

@@ -32,6 +32,8 @@ const CalendarSchema = new mongoose.Schema({
 const Calendar = mongoose.model('Calendar', CalendarSchema);
 
 // API Routes
+
+// Create a new calendar
 app.post('/calendars', async (req, res) => {
     try {
         const newCalendar = new Calendar(req.body);
@@ -42,11 +44,32 @@ app.post('/calendars', async (req, res) => {
     }
 });
 
+// Get all calendars
 app.get('/calendars', async (req, res) => {
     const calendars = await Calendar.find();
     res.json(calendars);
 });
 
+// Get a single calendar by ID (API Route)
+app.get('/api/kalendars/:id', async (req, res) => {
+    try {
+        const calendar = await Calendar.findById(req.params.id);
+        if (!calendar) {
+            return res.status(404).json({ error: 'Calendar not found' });
+        }
+        res.json(calendar);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Serve the calendar page (HTML Route)
+app.get('/kalendars/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/pages/kalendars.html'));
+});
+
+
+// Update a calendar by ID
 app.put('/calendars/:id', async (req, res) => {
     try {
         const updatedCalendar = await Calendar.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -56,6 +79,7 @@ app.put('/calendars/:id', async (req, res) => {
     }
 });
 
+// Delete a calendar by ID
 app.delete('/calendars/:id', async (req, res) => {
     try {
         await Calendar.findByIdAndDelete(req.params.id);

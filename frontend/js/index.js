@@ -58,7 +58,7 @@
         if(color.value !== '#ffffff') {
             // allow
         } else {
-           alert('not allowed');
+           alert('balto nevar');
            color.value = '000000'; // set to black
         }
 

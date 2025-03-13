@@ -26,6 +26,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 const CalendarSchema = new mongoose.Schema({
     name: String,
     color: String,
+    events: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],  // Reference to Event model
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -43,29 +44,41 @@ const EventSchema = new mongoose.Schema({
 
 const Event = mongoose.model('Event', EventSchema);
 
-// API Routes
-
 // Create a new calendar
 app.post('/calendars', async (req, res) => {
     try {
+        // Create a new calendar document
         const newCalendar = new Calendar(req.body);
+
+        // Save the new calendar
         await newCalendar.save();
+
+        // Initialize an empty array for events (or you can add default events here if desired)
+        newCalendar.events = [];
+
+        // Update the calendar with the empty event list (if needed)
+        await newCalendar.save();
+
         res.json(newCalendar);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Get all calendars
+// Get all calendars with their events
 app.get('/calendars', async (req, res) => {
-    const calendars = await Calendar.find();
-    res.json(calendars);
+    try {
+        const calendars = await Calendar.find().populate('events');
+        res.json(calendars);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// Get a single calendar by ID
+// Get a single calendar by ID with its events
 app.get('/api/kalendars/:id', async (req, res) => {
     try {
-        const calendar = await Calendar.findById(req.params.id);
+        const calendar = await Calendar.findById(req.params.id).populate('events');
         if (!calendar) {
             return res.status(404).json({ error: 'Calendar not found' });
         }
@@ -85,6 +98,14 @@ app.post('/api/events', async (req, res) => {
     try {
         const newEvent = new Event(req.body);
         await newEvent.save();
+
+        // Add the event to the calendar's events array
+        const calendar = await Calendar.findById(req.body.calendarId);
+        if (calendar) {
+            calendar.events.push(newEvent._id);
+            await calendar.save();
+        }
+
         res.json(newEvent);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -130,5 +151,29 @@ app.delete('/calendars/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Delete a calendar by ID
+app.delete('/calendars/:id', async (req, res) => {
+    try {
+        await Calendar.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Calendar deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Backend route for deleting calendar
+app.delete('/api/kalendars/:id', async (req, res) => {
+    try {
+        const calendar = await Calendar.findByIdAndDelete(req.params.id);
+        if (!calendar) {
+            return res.status(404).json({ error: 'Calendar not found' });
+        }
+        res.json({ message: 'Calendar deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

@@ -11,11 +11,45 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.error('Calendar ID not found in the URL.');
         return;
     }
+
+    // Show the delete calendar button when the calendar is loaded
+    const deleteCalendarBtn = document.getElementById('delete-calendar-btn');
+    deleteCalendarBtn.classList.remove('hidden');  // Unhide the delete button
     
+    deleteCalendarBtn.addEventListener('click', function () {
+        // Show confirmation before deletion
+        const confirmDelete = window.confirm('Vai tiešām vēlaties dzēst šo kalendāru? Šo darbību nevarēs atjaunot.');
+        
+        if (confirmDelete) {
+            // Proceed to delete the calendar via API
+            deleteCalendar(calendarId);
+        }
+    });
+    
+    async function deleteCalendar(calendarId) {
+        try {
+            const response = await fetch(`/api/kalendars/${calendarId}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                // Redirect to the home page or show success message
+                alert('Kalendārs tika dzēsts.');
+                window.location.href = '/';  // Redirect to the home page after deletion
+            } else {
+                alert('Radās kļūda dzēšot kalendāru.');
+            }
+        } catch (error) {
+            console.error('Error deleting calendar:', error);
+            alert('Radās kļūda dzēšot kalendāru.', error);
+        }
+    }
+
+    // Default current date and calendar color
     let currentDate = new Date();
     let calendarColor = '#007bff'; // Default color
     
     try {
+        // Fetch calendar data from API
         const response = await fetch(`/api/kalendars/${calendarId}`);
         const calendarData = await response.json();
         if (!calendarData || !calendarData.color) {
@@ -23,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
     
+        // Set the calendar's background color
         calendarColor = calendarData.color;
         document.documentElement.style.setProperty('--calendar-bg-color', calendarColor);
         document.documentElement.style.setProperty('--event-bg-color', calendarColor);
@@ -35,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (error) {
         console.error('Error fetching calendar data:', error);
     }
-    
+
     function renderCalendar(currentDate, events, calendarColor) {
         const calendar = document.querySelector('.calendar');
         const monthYear = document.getElementById('month-year');
@@ -203,4 +238,4 @@ document.addEventListener('DOMContentLoaded', async function () {
         currentDate.setMonth(currentDate.getMonth() + 1);
         updateEvents();
     });
-    });
+});

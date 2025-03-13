@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - User Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f6f5f7;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1,
+        h2 {
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .user-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .button {
+            background-color: #FF4B2B;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #ff416c;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-buttons .edit {
+            background-color: #00C9FF;
+            color: white;
+        }
+
+        .action-buttons .delete {
+            background-color: #FF4B2B;
+            color: white;
+        }
+
+        footer {
+            background-color: #222;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <a href="#" class="button" id="logout-button">Logout</a>
+        </div>
+
+        <h2>User Management</h2>
+
+        <!-- Register New User -->
+        <form id="register-form" onsubmit="registerUser(event)">
+            <input type="text" id="username" placeholder="Username" required />
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Password" required />
+            <button type="submit" class="button">Register User</button>
+        </form>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="user-list">
+                <!-- Dynamic user list rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <p>Created with <i class="fa fa-heart"></i> by <a target="_blank" href="https://florin-pop.com">Florin Pop</a>.</p>
+    </footer>
+
+    <!-- Include jQuery before your script -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        const API_URL = 'http://localhost:5000'; // Adjust your API URL
+
+        // Load users from the API
+        async function loadUsers() {
+    try {
+        const response = await fetch(`${API_URL}/admin/users`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorHtml = await response.text();
+            console.error('Error response:', errorHtml);
+            alert('Failed to load users. Please check your credentials and try again.');
+            return;
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+            console.error(result.error);
+            alert(result.error);
+            return;
+        }
+
+        if (!Array.isArray(result)) {
+            throw new Error('Expected an array of users');
+        }
+
+        const users = result;
+        const userListContainer = document.getElementById('user-list');
+        userListContainer.innerHTML = '';  // Clear existing rows
+
+        if (users.length === 0) {
+            userListContainer.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
+        }
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+row.innerHTML = `
+    <td>${user._id}</td>
+    <td>${user.username || 'N/A'}</td>
+    <td>${user.email || 'N/A'}</td>
+    <td id="status-${user._id}">${user.isAdmin ? 'Admin' : 'User'}</td>
+    <td class="action-buttons">
+        <button class="edit" onclick="editUser('${user._id}')">Edit</button>
+        <button class="delete" onclick="deleteUser('${user._id}')">Delete</button>
+        <button class="edit" onclick="setAdmin('${user._id}')">Set Admin</button>
+    </td>
+`;
+userListContainer.appendChild(row);
+        });
+    } catch (err) {
+        console.error('Error loading users:', err);
+    }
+}
+
+
+
+
+        // Register a new user
+        async function registerUser(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const data = {
+                username,
+                email,
+                password
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure token is sent
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('User registered successfully');
+                    loadUsers(); // Refresh the user list
+                } else {
+                    alert('Error registering user');
+                }
+            } catch (err) {
+                console.error('Error registering user:', err);
+            }
+        }
+
+        // Edit user
+        async function editUser(userId) {
+            alert(`Edit user with ID: ${userId}`);
+            // Implement edit user functionality by calling the relevant API for editing
+        }
+
+        // Delete user
+        async function deleteUser(userId) {
+            const confirmDelete = confirm(`Are you sure you want to delete user with ID: ${userId}?`);
+            if (confirmDelete) {
+                try {
+                    const response = await fetch(`${API_URL}/api/users/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure token is sent
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('User deleted');
+                        loadUsers(); // Refresh the user list
+                    } else {
+                        alert('Error deleting user');
+                    }
+                } catch (err) {
+                    console.error('Error deleting user:', err);
+                }
+            }
+        }
+
+        async function setAdmin(userId) {
+    try {
+        const response = await fetch(`${API_URL}/api/users/${userId}/set-admin`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isAdmin: true })  // Set user as admin
+        });
+
+        if (!response.ok) {
+            const errorHtml = await response.text();
+            console.error('Error response:', errorHtml);
+            alert('Failed to set user as admin.');
+            return;
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+            console.error(result.error);
+            alert(result.error);
+            return;
+        }
+
+        alert('User has been set as Admin');
+
+        // **Directly update UI instead of full reload**
+        document.getElementById(`status-${userId}`).textContent = 'Admin';
+
+    } catch (err) {
+        console.error('Error setting admin:', err);
+        alert('Error setting user as admin.');
+    }
+}
+
+
+
+        // Logout function
+        async function logoutUser() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('No user is logged in.');
+                return;
+            }
+
+            try {
+                // Make a request to the API to invalidate the token (optional, if your backend supports it)
+                const response = await fetch(`${API_URL}/api/logout`, {
+                    method: 'POST', // Assuming POST for logout
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+
+                if (response.ok) {
+                    // Clear the token from localStorage
+                    localStorage.removeItem('token');
+                    alert('Logged out successfully');
+                    window.location.href = '/login.html'; // Redirect to login page
+                } else {
+                    alert('Error logging out');
+                }
+            } catch (err) {
+                console.error('Error logging out:', err);
+                alert('Error logging out');
+            }
+        }
+
+        // Attach the logout function to the logout button
+        document.getElementById('logout-button').addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default anchor behavior
+            logoutUser();
+        });
+
+        // Call loadUsers on page load
+        window.onload = loadUsers;  // Ensure this is loaded when the page is refreshed or initially loaded
+    </script>
+</body>
+
+</html>

@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const response = await fetch(`/api/kalendars/${calendarId}`, {
                 method: 'DELETE',
-            });
+            });             
             if (response.ok) {
                 // Redirect to the home page or show success message
                 alert('Kalendārs tika dzēsts.');

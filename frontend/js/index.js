@@ -163,3 +163,12 @@ function addRandomPresetColor() {
 
 // Initialize with a random preset color
 addRandomPresetColor();
+
+document.getElementById('logoutButton').addEventListener('click', () => {
+    // Remove the token from localStorage or sessionStorage
+    localStorage.removeItem('authToken');  // or sessionStorage depending on where you store the token
+
+    // Redirect the user to the login page
+    window.location.href = '/login';  // Adjust the path to your login page
+});
+

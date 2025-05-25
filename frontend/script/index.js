@@ -1,3 +1,9 @@
+/*
+  Author: Rainers
+  Last Modified By: Rainers
+  Last Modified: 2025-05-25
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
             let allCalendars = [];
 

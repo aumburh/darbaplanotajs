@@ -1,4 +1,10 @@
-        function showLogin() {
+/*
+  Author: Rainers
+  Last Modified By: Rainers
+  Last Modified: 2025-05-25
+*/
+
+function showLogin() {
             document.getElementById('login-container').style.display = 'flex';
             document.getElementById('register-container').style.display = 'none';
             document.getElementById('login-error').style.display = 'none';

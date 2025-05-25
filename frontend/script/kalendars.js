@@ -1,4 +1,10 @@
-        // --- Calendar App ---
+/*
+  Author: Rainers
+  Last Modified By: Rainers
+  Last Modified: 2025-05-25
+*/
+
+// Ensure the script runs after DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             // Get calendarId from URL
             const pathParts = window.location.pathname.split('/');

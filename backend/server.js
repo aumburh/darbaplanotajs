@@ -14,16 +14,21 @@ app.use(express.json());
 // app.use(helmet());
 
 // Serve frontend files
-app.use(express.static(path.join(__dirname, "../frontend/pages")));
 
+
+// Serve HTML pages via explicit routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/pages/index.html"));
 });
-
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/pages/login.html"));
 });
+app.get("/kalendars/:id", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/pages/kalendars.html"));
+});
 
+// Serve static assets first
+app.use(express.static(path.join(__dirname, "../frontend/pages")));
 app.use('/style', express.static(path.join(__dirname, '../frontend/style')));
 app.use('/script', express.static(path.join(__dirname, '../frontend/script')));
 app.use('/images', express.static(path.join(__dirname, '../frontend/images')));

@@ -26,6 +26,7 @@ app.get("/login", (req, res) => {
 
 app.use('/style', express.static(path.join(__dirname, '../frontend/style')));
 app.use('/script', express.static(path.join(__dirname, '../frontend/script')));
+app.use('/images', express.static(path.join(__dirname, '../frontend/images')));
 
 // Connect to MongoDB
 mongoose

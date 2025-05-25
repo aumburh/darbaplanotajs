@@ -104,7 +104,7 @@
                 // Show events
                 const month = currentDate.getMonth() + 1, year = currentDate.getFullYear();
                 const dayEvents = events.filter(ev => ev.day === day && ev.month === month && ev.year === year);
-                eventsEl.innerHTML = `<h3>Events for day ${day}</h3>`;
+                eventsEl.innerHTML = `<h3>Notikumi ${day}. datumā</h3>`;
                 if (dayEvents.length) {
                     dayEvents.forEach(ev => {
                         const evEl = document.createElement('div');
@@ -127,7 +127,7 @@
                         eventsEl.appendChild(evEl);
                     });
                 } else {
-                    eventsEl.innerHTML += `<p>No events for this day.</p>`;
+                    eventsEl.innerHTML += `<p>Šajā dienā nav notikumu.</p>`;
                 }
             }
 

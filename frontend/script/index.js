@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nameBtn = document.createElement('button');
                 nameBtn.textContent = calendar.name;
                 nameBtn.className = 'flex-1 text-left px-6 py-4 text-lg font-medium hover:underline';
-                nameBtn.onclick = () => window.open(`/kalendars/${calendar._id}`, '_blank');
+                nameBtn.onclick = () => window.location.href = `/kalendars/${calendar._id}`;
                 btn.appendChild(nameBtn);
 
                 // Actions

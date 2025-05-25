@@ -1,0 +1,53 @@
+:root {
+  --main-bg-light: #f8fafc;
+  --main-bg-dark: #1e293b;
+}
+
+body {
+  background-color: var(--main-bg-light);
+  color: #222;
+  transition: background 0.3s, color 0.3s;
+}
+
+.dark {
+  background-color: var(--main-bg-dark);
+  color: #f1f5f9;
+}
+
+.calendar-button {
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.calendar-button:hover {
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.modal-bg {
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(2px);
+}
+
+.perm-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.perm-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.perm-label:hover {
+  background: #f1f5f9;
+}
+
+.dark .perm-label:hover {
+  background: #334155;
+}

@@ -1,0 +1,231 @@
+:root {
+  --main: #3a7afe;
+  --bg: #f5f7fa;
+  --white: #fff;
+  --radius: 12px;
+  --shadow: 0 2px 16px rgba(60, 72, 88, 0.07);
+  --danger: #ff4d4d;
+  --text: #222;
+  --muted: #7a7a7a;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-container {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 22px 20px 22px;
+  max-width: 370px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  color: var(--main);
+  border-radius: var(--radius);
+  padding: 0;
+  font-size: 1.08rem;
+  margin-bottom: 2px;
+}
+
+.calendar-controls button {
+  background: none;
+  border: none;
+  color: var(--main);
+  font-size: 1.2rem;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.calendar-controls button:hover {
+  background: var(--hover-bg);
+  color: var(--main);
+}
+
+#month-year {
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  background: none;
+  border-radius: var(--radius);
+  padding: 0;
+  min-height: 240px;
+}
+
+.day-of-week {
+  font-weight: 500;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.97rem;
+  margin-bottom: 2px;
+  background: none;
+  padding: 2px 0 6px 0;
+  user-select: none;
+}
+
+.day {
+  background: var(--white);
+  border-radius: 8px;
+  padding: 10px 0;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.02rem;
+  transition: background 0.13s, color 0.13s, box-shadow 0.13s;
+  border: 1px solid transparent;
+  min-height: 34px;
+  user-select: none;
+  color: var(--text);
+}
+
+.day.has-event {
+  background: var(--event-bg);
+  font-weight: 600;
+  border-color: var(--main);
+  color: var(--main);
+}
+
+.day:hover {
+  background: var(--hover-bg);
+}
+
+.day.selected {
+  background: var(--main) !important;
+  color: var(--white);
+  border-color: var(--main);
+  box-shadow: 0 2px 8px rgba(58, 122, 254, 0.09);
+}
+
+#event-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+#event-form input {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1.2px solid #e0e0e0;
+  border-radius: 7px;
+  background: #fafbfc;
+  transition: border 0.15s;
+}
+
+#event-form input:focus {
+  border-color: var(--main);
+  background: #fff;
+  outline: none;
+}
+
+#event-form button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  background: var(--main);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.18s;
+}
+
+#event-form button:hover {
+  background: #174ea6;
+}
+
+#events {
+  margin: 0;
+  padding: 0;
+}
+
+#events h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.04rem;
+  font-weight: 600;
+  color: var(--main);
+}
+
+.event {
+  background: #f5f7fa;
+  color: var(--main);
+  /* <--- This makes the event text the same blue as your calendar color */
+  padding: 8px 12px;
+  border-radius: 7px;
+  margin-bottom: 7px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  border: 1px solid #e3e9f7;
+}
+
+.event button {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 0.98rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.13s, color 0.13s;
+}
+
+.event button:hover {
+  background: var(--hover-bg);
+  color: #c00;
+}
+
+#events p {
+  color: var(--muted);
+  margin: 0 0 0 2px;
+  font-size: 0.98rem;
+}
+
+@media (max-width: 600px) {
+  .calendar-container {
+    max-width: 98vw;
+    padding: 10px 2vw 12px 2vw;
+  }
+
+  .calendar {
+    min-height: 160px;
+    padding: 0;
+  }
+
+  #event-form button {
+    padding: 7px 10px;
+    font-size: 0.97rem;
+  }
+}

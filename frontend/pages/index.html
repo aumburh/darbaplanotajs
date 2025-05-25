@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,63 +8,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        :root {
-            --main-bg-light: #f8fafc;
-            --main-bg-dark: #1e293b;
-        }
-        body {
-            background-color: var(--main-bg-light);
-            color: #222;
-            transition: background 0.3s, color 0.3s;
-        }
-        .dark {
-            background-color: var(--main-bg-dark);
-            color: #f1f5f9;
-        }
-        .calendar-button {
-            transition: box-shadow 0.15s, transform 0.15s;
-        }
-        .calendar-button:hover {
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
-            transform: translateY(-2px) scale(1.02);
-        }
-        .modal-bg {
-            background: rgba(0,0,0,0.25);
-            backdrop-filter: blur(2px);
-        }
-        .perm-icon {
-            width: 1.5rem;
-            height: 1.5rem;
-        }
-        .perm-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .perm-label:hover {
-            background: #f1f5f9;
-        }
-        .dark .perm-label:hover {
-            background: #334155;
-        }
-    </style>
+    <link rel="stylesheet" href="../style/index.css">
 </head>
-<body class="min-h-screen flex flex-col bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text">
+
+<body
+    class="min-h-screen flex flex-col bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text">
     <header class="sticky top-0 z-20 bg-white/90 dark:bg-gray-900/90 backdrop-blur shadow-sm">
         <div class="max-w-3xl mx-auto flex justify-between items-center py-4 px-6">
             <h1 class="text-2xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300">Darba Plānotājs</h1>
             <div class="flex items-center gap-3 w-2/3 max-w-md">
-                <input type="text" id="searchBar" placeholder="Meklēt..." class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900 transition">
+                <input type="text" id="searchBar" placeholder="Meklēt..."
+                    class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                <button id="themeToggle"
+                    class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900 transition">
                     <i id="themeIcon" class="fa-regular fa-moon text-xl"></i>
                 </button>
-                <button id="logoutButton" class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold transition flex items-center gap-2">
+                <button id="logoutButton"
+                    class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold transition flex items-center gap-2">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Izlogoties
                 </button>
@@ -74,7 +35,8 @@
         <section class="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Kalendāri</h2>
-                <button id="addCalendar" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow transition">
+                <button id="addCalendar"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow transition">
                     <i class="fa-solid fa-plus"></i>
                     Pievienot kalendāru
                 </button>
@@ -87,476 +49,100 @@
     <!-- Create Modal -->
     <div id="calendarModal" class="hidden fixed inset-0 z-30 modal-bg flex items-center justify-center">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-80 relative animate-fadeIn">
-            <button id="closeModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl">
+            <button id="closeModal"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h2 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Izveidot kalendāru</h2>
             <div class="mb-4">
-                <label for="calendarName" class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Nosaukums</label>
-                <input type="text" id="calendarName" placeholder="Kalendāra nosaukums" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                <label for="calendarName"
+                    class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Nosaukums</label>
+                <input type="text" id="calendarName" placeholder="Kalendāra nosaukums"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
             </div>
             <div class="mb-6 flex items-center gap-3">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
-                <input type="color" id="calendarColor" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 shadow transition" style="padding:0;">
+                <label for="calendarColor"
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
+                <button id="colorPreviewBtn" type="button"
+                    class="inline-block w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 shadow transition"
+                    style="background:#2563eb; border-width:2px; border-color:#d1d5db;">
+                </button>
+                <input type="color" id="calendarColor" class="absolute opacity-0 w-0 h-0" tabindex="-1">
             </div>
-            <button id="saveCalendar" class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition mb-2">Saglabāt</button>
+            <button id="saveCalendar"
+                class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition mb-2">Saglabāt</button>
         </div>
     </div>
     <!-- Edit Modal -->
-<div id="editCalendarModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-80 relative" style="color: #000;">
-        <button id="closeEditModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-        <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">Rediģēt kalendāru</h2>
-        <input type="text" id="editCalendarName" class="w-full mb-4 px-3 py-2 rounded-lg border" placeholder="Nosaukums">
-        <div class="flex items-center gap-3 mb-4">
-            <label for="editCalendarColor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
-            <button id="editColorPreviewBtn" type="button"
-                class="inline-block w-8 h-8 rounded-full border-2 border-gray-300 shadow transition"
-                style="background:#2563eb; border-width:2px; border-color:#d1d5db;">
+    <div id="editCalendarModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-80 relative" style="color: #000;">
+            <button id="closeEditModal"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl">
+                <i class="fa-solid fa-xmark"></i>
             </button>
-            <input type="color" id="editCalendarColor" class="absolute opacity-0 w-0 h-0" tabindex="-1">
-        </div>
-        <button id="saveEditCalendar" class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">Saglabāt</button>
-    </div>
-</div>
-    <!-- Share Modal -->
-<div id="shareCalendarModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md relative transition-all duration-300 animate-fadeIn">
-        <button id="closeShareModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl transition-colors">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-        <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">Dalīties ar kalendāru</h2>
-        <!-- Add user section -->
-        <div class="mb-6 p-5 rounded-xl bg-gray-50 dark:bg-gray-700 flex flex-col gap-3 shadow-sm">
-            <input type="email" id="shareEmail" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" placeholder="Lietotāja e-pasts">
-            <div class="flex flex-col gap-2">
-                <label class="perm-label"><input type="checkbox" id="permEdit" class="mr-1"><i class="fa-solid fa-pen perm-icon"></i>Rediģēt</label>
-                <label class="perm-label"><input type="checkbox" id="permDelete" class="mr-1"><i class="fa-solid fa-trash perm-icon"></i>Dzēst</label>
-                <label class="perm-label"><input type="checkbox" id="permRename" class="mr-1"><i class="fa-solid fa-i-cursor perm-icon"></i>Pārsaukt</label>
-                <label class="perm-label"><input type="checkbox" id="permAddEvent" class="mr-1"><i class="fa-solid fa-calendar-plus perm-icon"></i>Pievienot notikumu</label>
-                <label class="perm-label"><input type="checkbox" id="permDeleteEvent" class="mr-1"><i class="fa-solid fa-calendar-xmark perm-icon"></i>Dzēst notikumu</label>
-                <label class="perm-label"><input type="checkbox" id="permEditEvent" class="mr-1"><i class="fa-solid fa-pen perm-icon"></i>Rediģēt notikumu</label>
+            <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">Rediģēt kalendāru</h2>
+            <input type="text" id="editCalendarName" class="w-full mb-4 px-3 py-2 rounded-lg border"
+                placeholder="Nosaukums">
+            <div class="flex items-center gap-3 mb-4">
+                <label for="editCalendarColor"
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
+                <button id="editColorPreviewBtn" type="button"
+                    class="inline-block w-8 h-8 rounded-full border-2 border-gray-300 shadow transition"
+                    style="background:#2563eb; border-width:2px; border-color:#d1d5db;">
+                </button>
+                <input type="color" id="editCalendarColor" class="absolute opacity-0 w-0 h-0" tabindex="-1">
             </div>
-            <button id="addShareUser" class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold flex items-center gap-2 justify-center hover:bg-blue-700 transition">
-                <i class="fa-solid fa-user-plus"></i> Dalīties
-            </button>
-        </div>
-        <hr class="my-4 border-gray-200 dark:border-gray-600">
-                <div class="mb-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
-            <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-            <input type="text" id="sharedUsersSearch" placeholder="Meklēt lietotāju..." class="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400" />
-        </div>
-        <!-- Shared users list -->
-        <div>
-            <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 text-center">Dalīts ar:</h3>
-            <div id="sharedUsersList" class="flex flex-col gap-2"></div>
+            <button id="saveEditCalendar"
+                class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">Saglabāt</button>
         </div>
     </div>
-</div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-        let allCalendars = [];
-
-        if (!localStorage.getItem('token')) {
-            window.location.href = '/login';
-            return;
-        }
-
-        tailwind.config = { darkMode: 'class' };
-
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const body = document.body;
-        const addCalendar = document.getElementById('addCalendar');
-        const calendarList = document.getElementById('calendarList');
-        const calendarModal = document.getElementById('calendarModal');
-        const closeModal = document.getElementById('closeModal');
-        const saveCalendar = document.getElementById('saveCalendar');
-        const calendarName = document.getElementById('calendarName');
-        const colorInput = document.getElementById('calendarColor');
-
-        // Edit modal
-            const editColorPreviewBtn = document.getElementById('editColorPreviewBtn');
-            const editCalendarColor = document.getElementById('editCalendarColor');
-            const editCalendarModal = document.getElementById('editCalendarModal');
-            const editCalendarName = document.getElementById('editCalendarName');
-            const saveEditCalendar = document.getElementById('saveEditCalendar');
-            const closeEditModal = document.getElementById('closeEditModal');
-            let editingCalendarId = null;
-
-        // Share modal
-        let sharingCalendar = null;
-        const shareCalendarModal = document.getElementById('shareCalendarModal');
-        const closeShareModal = document.getElementById('closeShareModal');
-        const shareEmail = document.getElementById('shareEmail');
-        const permEdit = document.getElementById('permEdit');
-        const permDelete = document.getElementById('permDelete');
-        const permRename = document.getElementById('permRename');
-        const permAddEvent = document.getElementById('permAddEvent');
-        const permDeleteEvent = document.getElementById('permDeleteEvent');
-        const permEditEvent = document.getElementById('permEditEvent');
-        const addShareUser = document.getElementById('addShareUser');
-        const sharedUsersList = document.getElementById('sharedUsersList');
-
-        // Color preview for edit modal
-            editColorPreviewBtn.addEventListener('click', () => editCalendarColor.click());
-            editCalendarColor.addEventListener('input', () => {
-                editColorPreviewBtn.style.background = editCalendarColor.value;
-            });
-
-
-            function openEditModal(calendar) {
-                editingCalendarId = calendar._id;
-                editCalendarName.value = calendar.name;
-                editCalendarColor.value = calendar.color;
-                editColorPreviewBtn.style.background = calendar.color;
-                editCalendarModal.classList.remove('hidden');
-            }
-
-        // 
-        closeEditModal.onclick = () => editCalendarModal.classList.add('hidden');
-        saveEditCalendar.onclick = async () => {
-            const token = localStorage.getItem('token');
-            await fetch(`/api/kalendars/${editingCalendarId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    name: editCalendarName.value,
-                    color: editCalendarColor.value
-                })
-            });
-            editCalendarModal.classList.add('hidden');
-            fetchCalendars();
-        };
-
-        // Theme toggle
-        themeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark');
-            themeIcon.className = body.classList.contains('dark')
-                ? 'fa-solid fa-sun text-xl'
-                : 'fa-regular fa-moon text-xl';
-            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
-        });
-        if (localStorage.getItem('theme') === 'dark') {
-            body.classList.add('dark');
-            themeIcon.className = 'fa-solid fa-sun text-xl';
-        } else {
-            themeIcon.className = 'fa-regular fa-moon text-xl';
-        }
-
-        // Modal open/close
-        addCalendar.addEventListener('click', () => {
-            calendarModal.classList.remove('hidden');
-            setTimeout(() => calendarName.focus(), 100);
-        });
-        closeModal.addEventListener('click', () => {
-            calendarModal.classList.add('hidden');
-        });
-        window.addEventListener('keydown', (e) => {
-            if (!calendarModal.classList.contains('hidden') && e.key === 'Escape') {
-                calendarModal.classList.add('hidden');
-            }
-            if (!editCalendarModal.classList.contains('hidden') && e.key === 'Escape') {
-                editCalendarModal.classList.add('hidden');
-            }
-            if (!shareCalendarModal.classList.contains('hidden') && e.key === 'Escape') {
-                shareCalendarModal.classList.add('hidden');
-            }
-        });
-
-        // Add calendar
-        saveCalendar.addEventListener('click', async () => {
-            const name = calendarName.value.trim();
-            const color = colorInput.value || '#2563eb';
-            if (!name) return;
-
-            const newCalendar = { name, color };
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/kalendars', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify(newCalendar)
-                });
-                calendarModal.classList.add('hidden');
-                calendarName.value = "";
-                colorInput.value = "#2563eb";
-                fetchCalendars();
-            } catch (error) {
-                alert('Neizdevās izveidot kalendāru.');
-            }
-        });
-
-        // Render calendar button
-        function addCalendarButton(calendar) {
-            const btn = document.createElement('div');
-            btn.className = 'calendar-button flex items-center gap-4 px-0 py-0 rounded-xl font-semibold shadow bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-700 transition overflow-hidden relative group';
-            btn.style.minHeight = '60px';
-
-            // Color circle
-            const colorCircle = document.createElement('span');
-            colorCircle.className = 'inline-block w-5 h-5 rounded-full border-2 border-white shadow mr-3 ml-4';
-            colorCircle.style.backgroundColor = calendar.color;
-            btn.appendChild(colorCircle);
-
-            // Calendar name (click to open)
-            const nameBtn = document.createElement('button');
-            nameBtn.textContent = calendar.name;
-            nameBtn.className = 'flex-1 text-left px-6 py-4 text-lg font-medium hover:underline';
-            nameBtn.onclick = () => window.open(`/kalendars/${calendar._id}`, '_blank');
-            btn.appendChild(nameBtn);
-
-            // Actions
-            const actions = document.createElement('div');
-            actions.className = 'flex items-center gap-2 pr-4';
-
-            // Edit button
-            const editBtn = document.createElement('button');
-            editBtn.title = 'Rediģēt';
-            editBtn.className = 'text-blue-500 hover:text-blue-700 p-2 rounded transition';
-            editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-            editBtn.onclick = () => openEditModal(calendar);
-            actions.appendChild(editBtn);
-
-            // Delete button
-            const delBtn = document.createElement('button');
-            delBtn.title = 'Dzēst';
-            delBtn.className = 'text-red-500 hover:text-red-700 p-2 rounded transition';
-            delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-            delBtn.onclick = async () => {
-                if (confirm('Dzēst šo kalendāru?')) {
-                    const token = localStorage.getItem('token');
-                    await fetch(`/api/kalendars/${calendar._id}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    fetchCalendars();
-                }
-            };
-            actions.appendChild(delBtn);
-
-            // Share button
-            const shareBtn = document.createElement('button');
-            shareBtn.title = 'Dalīties';
-            shareBtn.className = 'text-green-500 hover:text-green-700 p-2 rounded transition';
-            shareBtn.innerHTML = '<i class="fa-solid fa-user-group"></i>';
-            shareBtn.onclick = () => openShareModal(calendar);
-            actions.appendChild(shareBtn);
-
-            btn.appendChild(actions);
-            calendarList.appendChild(btn);
-        }
-
-        // Fetch calendars
-        async function fetchCalendars() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/kalendars', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-                allCalendars = await response.json();
-                calendarList.innerHTML = '';
-                allCalendars.forEach(addCalendarButton);
-            } catch (error) {
-                calendarList.innerHTML = '<span class="text-red-500">Neizdevās ielādēt kalendārus.</span>';
-            }
-        }
-
-        // Search bar
-        const searchBar = document.getElementById('searchBar');
-        searchBar.addEventListener('input', () => {
-            const query = searchBar.value.trim().toLowerCase();
-            calendarList.innerHTML = '';
-            allCalendars
-                .filter(cal => cal.name.toLowerCase().includes(query))
-                .forEach(addCalendarButton);
-        });
-
-        // Logout
-        const logoutButton = document.getElementById('logoutButton');
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        });
-
-        // Share modal logic
-        function openShareModal(calendar) {
-            sharingCalendar = calendar;
-            shareCalendarModal.classList.remove('hidden');
-            loadSharedUsers();
-        }
-        closeShareModal.onclick = () => shareCalendarModal.classList.add('hidden');
-        addShareUser.onclick = async () => {
-            const token = localStorage.getItem('token');
-            await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    email: shareEmail.value,
-                    permissions: {
-                        edit: permEdit.checked,
-                        delete: permDelete.checked,
-                        rename: permRename.checked,
-                        addEvent: permAddEvent.checked,
-                        deleteEvent: permDeleteEvent.checked,
-                        editEvent: permEditEvent.checked
-                    }
-                })
-            });
-            shareEmail.value = '';
-            loadSharedUsers();
-        };
-let allSharedUsers = []; // Store all users for filtering
-
-async function loadSharedUsers() {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/kalendars/${sharingCalendar._id}`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const cal = await res.json();
-    allSharedUsers = cal.sharedWith || [];
-    renderSharedUsersList('');
-}
-
-function renderSharedUsersList(search) {
-    sharedUsersList.innerHTML = '';
-    const searchLower = search.trim().toLowerCase();
-    allSharedUsers
-        .filter(sw => {
-            const email = (sw.user.email || sw.user || '').toLowerCase();
-            const username = (sw.user.username || '').toLowerCase();
-            return !searchLower || email.includes(searchLower) || username.includes(searchLower);
-        })
-        .forEach(sw => {
-            const div = document.createElement('div');
-            div.className = "flex flex-col bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 mb-2";
-
-            const email = sw.user.email || sw.user;
-            const username = sw.user.username ? ` (${sw.user.username})` : '';
-
-            // Top row: user info and actions
-            const topRow = document.createElement('div');
-            topRow.className = "flex items-center justify-between";
-
-            topRow.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-user text-gray-500"></i>
-                    <span class="font-medium text-gray-800 dark:text-gray-100">${email}${username}</span>
+    <!-- Share Modal -->
+    <div id="shareCalendarModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md relative transition-all duration-300 animate-fadeIn">
+            <button id="closeShareModal"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">Dalīties ar kalendāru</h2>
+            <!-- Add user section -->
+            <div class="mb-6 p-5 rounded-xl bg-gray-50 dark:bg-gray-700 flex flex-col gap-3 shadow-sm">
+                <input type="email" id="shareEmail"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                    placeholder="Lietotāja e-pasts">
+                <div class="flex flex-col gap-2">
+                    <label class="perm-label"><input type="checkbox" id="permEdit" class="mr-1"><i
+                            class="fa-solid fa-pen perm-icon"></i>Rediģēt</label>
+                    <label class="perm-label"><input type="checkbox" id="permDelete" class="mr-1"><i
+                            class="fa-solid fa-trash perm-icon"></i>Dzēst</label>
+                    <label class="perm-label"><input type="checkbox" id="permRename" class="mr-1"><i
+                            class="fa-solid fa-i-cursor perm-icon"></i>Pārsaukt</label>
+                    <label class="perm-label"><input type="checkbox" id="permAddEvent" class="mr-1"><i
+                            class="fa-solid fa-calendar-plus perm-icon"></i>Pievienot notikumu</label>
+                    <label class="perm-label"><input type="checkbox" id="permDeleteEvent" class="mr-1"><i
+                            class="fa-solid fa-calendar-xmark perm-icon"></i>Dzēst notikumu</label>
+                    <label class="perm-label"><input type="checkbox" id="permEditEvent" class="mr-1"><i
+                            class="fa-solid fa-pen perm-icon"></i>Rediģēt notikumu</label>
                 </div>
-            `;
-
-            // Remove button
-            const removeBtn = document.createElement('button');
-            removeBtn.className = "px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 text-xs flex items-center";
-            removeBtn.innerHTML = '<i class="fa-solid fa-user-xmark"></i>';
-            removeBtn.onclick = async () => {
-                const token = localStorage.getItem('token');
-                await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ email: sw.user.email || sw.user })
-                });
-                loadSharedUsers();
-            };
-            topRow.appendChild(removeBtn);
-
-            // Edit permissions button
-            const editBtn = document.createElement('button');
-            editBtn.className = "ml-2 px-2 py-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 text-xs flex items-center gap-1";
-            editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-            topRow.appendChild(editBtn);
-
-            div.appendChild(topRow);
-
-            // Permissions editor (hidden by default)
-            const permEditor = document.createElement('div');
-            permEditor.className = "flex flex-wrap gap-3 mt-2 items-center";
-            permEditor.style.display = "none";
-
-            // Permission checkboxes
-            const perms = [
-                { key: 'edit', label: 'Rediģēt' },
-                { key: 'delete', label: 'Dzēst' },
-                { key: 'rename', label: 'Pārsaukt' },
-                { key: 'addEvent', label: 'Pievienot notikumu' },
-                { key: 'deleteEvent', label: 'Dzēst notikumu' },
-                { key: 'editEvent', label: 'Rediģēt notikumu' }
-            ];
-            const permInputs = {};
-            perms.forEach(p => {
-                const label = document.createElement('label');
-                label.className = "flex items-center gap-1 text-sm";
-                const input = document.createElement('input');
-                input.type = "checkbox";
-                input.checked = sw.permissions && sw.permissions[p.key];
-                permInputs[p.key] = input;
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(p.label));
-                permEditor.appendChild(label);
-            });
-
-            // Save button
-            const saveBtn = document.createElement('button');
-            saveBtn.className = "ml-4 px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold";
-            saveBtn.textContent = "Saglabāt";
-            saveBtn.onclick = async () => {
-                const token = localStorage.getItem('token');
-                await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        email: sw.user.email || sw.user,
-                        permissions: {
-                            edit: permInputs.edit.checked,
-                            delete: permInputs.delete.checked,
-                            rename: permInputs.rename.checked,
-                            addEvent: permInputs.addEvent.checked,
-                            deleteEvent: permInputs.deleteEvent.checked,
-                            editEvent: permInputs.editEvent.checked
-                        }
-                    })
-                });
-                loadSharedUsers();
-            };
-            permEditor.appendChild(saveBtn);
-
-            div.appendChild(permEditor);
-
-            // Toggle permission editor
-            editBtn.onclick = () => {
-                permEditor.style.display = permEditor.style.display === "none" ? "flex" : "none";
-            };
-
-            sharedUsersList.appendChild(div);
-        });
-}
-
-// Add event listener for search
-document.getElementById('sharedUsersSearch').addEventListener('input', function() {
-    renderSharedUsersList(this.value);
-});
-
-        fetchCalendars();
-        });
-    </script>
+                <button id="addShareUser"
+                    class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold flex items-center gap-2 justify-center hover:bg-blue-700 transition">
+                    <i class="fa-solid fa-user-plus"></i> Dalīties
+                </button>
+            </div>
+            <hr class="my-4 border-gray-200 dark:border-gray-600">
+            <div class="mb-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
+                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                <input type="text" id="sharedUsersSearch" placeholder="Meklēt lietotāju..."
+                    class="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400" />
+            </div>
+            <!-- Shared users list -->
+            <div>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 text-center">Dalīts ar:</h3>
+                <div id="sharedUsersList" class="flex flex-col gap-2"></div>
+            </div>
+        </div>
+    </div>
+<script src="../script/index.js"></script>
 </body>
+
 </html>

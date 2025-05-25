@@ -1,101 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Login - Darba Planotājs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            background: #f4f6fb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .login-container {
-            background: #fff;
-            padding: 2.5rem 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 350px;
-        }
-        .login-container h2 {
-            margin-bottom: 1.5rem;
-            text-align: center;
-            color: #2d3a4b;
-        }
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.4rem;
-            color: #4a5568;
-            font-size: 0.98rem;
-        }
-        input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 0.7rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 1rem;
-            outline: none;
-            transition: border 0.2s;
-        }
-        input[type="email"]:focus, input[type="password"]:focus {
-            border-color: #2563eb;
-        }
-        .login-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.05rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .login-btn:hover {
-            background: #1d4ed8;
-        }
-        .error-message {
-            color: #dc2626;
-            background: #fee2e2;
-            padding: 0.7rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            font-size: 0.97rem;
-            display: none;
-        }
-        .register-link {
-            display: block;
-            text-align: center;
-            margin-top: 1.2rem;
-            color: #2563eb;
-            text-decoration: none;
-            font-size: 0.98rem;
-        }
-        .register-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+<link rel="stylesheet" href="../style/login.css">
 </head>
+
 <body>
     <div class="login-container" id="login-container">
         <h2>Pieslēgties</h2>
         <div class="error-message" id="login-error"></div>
         <form id="login-form" autocomplete="off">
             <div class="form-group">
-                <label for="email">E-pasts</label>
-                <input type="email" id="email" name="email" required autocomplete="username">
+                <label for="login-identifier">E-pasts vai lietotājvārds</label>
+                <input type="text" id="login-identifier" name="login-identifier" required autocomplete="username">
             </div>
             <div class="form-group">
-                <label for="password">Parole</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password">
+                <label for="login-password">Parole</label>
+                <input type="password" id="login-password" name="login-password" required
+                    autocomplete="current-password">
             </div>
             <button type="submit" class="login-btn">Pieslēgties</button>
         </form>
@@ -105,109 +30,29 @@
     <div class="login-container" id="register-container" style="display:none;">
         <h2>Reģistrēties</h2>
         <div class="error-message" id="register-error"></div>
-<form id="register-form" autocomplete="off">
-    <div class="form-group">
-        <label for="reg-email">E-pasts</label>
-        <input type="email" id="reg-email" name="reg-email" required autocomplete="username">
-    </div>
-    <div class="form-group">
-        <label for="reg-username">Lietotājvārds</label>
-        <input type="text" id="reg-username" name="reg-username" required autocomplete="username">
-    </div>
-    <div class="form-group">
-        <label for="reg-password">Parole</label>
-        <input type="password" id="reg-password" name="reg-password" required autocomplete="new-password">
-    </div>
-    <button type="submit" class="login-btn">Reģistrēties</button>
-</form>
+        <form id="register-form" autocomplete="off">
+            <div class="form-group">
+                <label for="reg-email">E-pasts</label>
+                <input type="email" id="reg-email" name="reg-email" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="reg-username">Lietotājvārds</label>
+                <input type="text" id="reg-username" name="reg-username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Parole</label>
+                <input type="password" id="reg-password" name="reg-password" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="reg-password2">Apstipriniet paroli</label>
+                <input type="password" id="reg-password2" name="reg-password2" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="login-btn">Reģistrēties</button>
+        </form>
         <a href="#" class="register-link" id="show-login">Jau ir konts? Pieslēgties</a>
     </div>
 
-    <script>
-        // Show/hide logic
-        function showLogin() {
-            document.getElementById('login-container').style.display = 'block';
-            document.getElementById('register-container').style.display = 'none';
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('register-error').style.display = 'none';
-        }
-        function showRegister() {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('register-container').style.display = 'block';
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('register-error').style.display = 'none';
-        }
-        document.getElementById('show-register').onclick = function(e) {
-            e.preventDefault();
-            showRegister();
-        };
-        document.getElementById('show-login').onclick = function(e) {
-            e.preventDefault();
-            showLogin();
-        };
-
-        // Login form handler (calls backend)
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const err = document.getElementById('login-error');
-            err.style.display = 'none';
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (res.ok && data.token) {
-                    localStorage.setItem('token', data.token);
-                    window.location.href = '/'; // Redirect to home
-                } else {
-                    err.textContent = data.message || 'Nepareizs e-pasts vai parole.';
-                    err.style.display = 'block';
-                }
-            } catch {
-                err.textContent = 'Servera kļūda.';
-                err.style.display = 'block';
-            }
-        });
-
-        // Register form handler (calls backend)
-        document.getElementById('register-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('reg-email').value.trim();
-    const username = document.getElementById('reg-username').value.trim();
-    const password = document.getElementById('reg-password').value;
-    const err = document.getElementById('register-error');
-    err.style.display = 'none';
-    if (!email || !username || !password) {
-        err.textContent = 'Lūdzu, aizpildiet visus laukus.';
-        err.style.display = 'block';
-        return;
-    }
-    try {
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, username, password })
-        });
-        const data = await res.json();
-        if (res.ok) {
-            alert('Reģistrācija veiksmīga! Tagad pieslēdzieties.');
-            showLogin();
-        } else {
-            err.textContent = data.message || 'Reģistrācija neizdevās.';
-            err.style.display = 'block';
-        }
-    } catch {
-        err.textContent = 'Servera kļūda.';
-        err.style.display = 'block';
-    }
-});
-
-        // Show login by default
-        showLogin();
-    </script>
+<script src="../script/login.js"></script>
 </body>
+
 </html>

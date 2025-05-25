@@ -14,6 +14,7 @@ const CalendarSchema = new mongoose.Schema({
         deleteEvent: Boolean,
         editEvent: Boolean
     }
+    
 }],
     createdAt: { type: Date, default: Date.now }
 });

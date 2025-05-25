@@ -18,7 +18,8 @@ router.get('/', auth, async (req, res) => {
 
 router.get('/:id', require('../middleware/auth'), async (req, res) => {
     try {
-        const calendar = await Calendar.findById(req.params.id);
+        const calendar = await Calendar.findById(req.params.id)
+            .populate('sharedWith.user', 'email username'); // <-- Add this line
         console.log('Fetching calendar with id:', req.params.id);
         if (!calendar) return res.status(404).json({ message: 'Calendar not found' });
         res.json(calendar);
@@ -64,37 +65,48 @@ router.post('/:id/share', auth, async (req, res) => {
     res.json({ message: 'Calendar shared' });
 });
 
-// Remove calendar (only owner or with delete permission)
-router.delete('/:id', auth, async (req, res) => {
-    const calendar = await Calendar.findById(req.params.id);
-    if (!calendar) return res.status(404).json({ error: 'Calendar not found' });
+router.post('/:id/share', require('../middleware/auth'), async (req, res) => {
+    const { email, permissions } = req.body;
+    const calendar = await Calendar.findById(req.params.id).populate('sharedWith.user');
+    if (!calendar) return res.status(404).json({ message: 'Not found' });
+    if (calendar.owner.toString() !== req.user.id) return res.status(403).json({ message: 'Forbidden' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (calendar.sharedWith.some(sw => sw.user.equals(user._id))) {
+        return res.status(400).json({ message: 'Already shared' });
+    }
+    calendar.sharedWith.push({ user: user._id, permissions });
+    await calendar.save();
+    res.json(calendar);
+});
 
-    if (String(calendar.owner) === req.user.id) {
-        await calendar.deleteOne();
-        return res.json({ message: 'Calendar deleted' });
-    }
-    // If shared, check permission
-    const shared = calendar.sharedWith.find(sw => String(sw.user) === req.user.id);
-    if (shared && shared.permissions.delete) {
-        await calendar.deleteOne();
-        return res.json({ message: 'Calendar deleted' });
-    }
-    res.status(403).json({ error: 'No permission' });
+router.delete('/:id/share', require('../middleware/auth'), async (req, res) => {
+    const { email } = req.body;
+    const calendar = await Calendar.findById(req.params.id).populate('sharedWith.user');
+    if (!calendar) return res.status(404).json({ message: 'Not found' });
+    if (calendar.owner.toString() !== req.user.id) return res.status(403).json({ message: 'Forbidden' });
+    calendar.sharedWith = calendar.sharedWith.filter(sw => (sw.user.email || sw.user) !== email);
+    await calendar.save();
+    res.json(calendar);
+});
+
+// Remove calendar (only owner or with delete permission)
+router.delete('/:id', require('../middleware/auth'), async (req, res) => {
+    const calendar = await Calendar.findById(req.params.id);
+    if (!calendar) return res.status(404).json({ message: 'Not found' });
+    if (calendar.owner.toString() !== req.user.id) return res.status(403).json({ message: 'Forbidden' });
+    await calendar.deleteOne();
+    res.json({ message: 'Deleted' });
 });
 
 // Update calendar (rename, color, etc. - only owner or with edit/rename permission)
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', require('../middleware/auth'), async (req, res) => {
+    const { name, color } = req.body;
     const calendar = await Calendar.findById(req.params.id);
-    if (!calendar) return res.status(404).json({ error: 'Calendar not found' });
-
-    let canEdit = String(calendar.owner) === req.user.id;
-    if (!canEdit) {
-        const shared = calendar.sharedWith.find(sw => String(sw.user) === req.user.id);
-        if (shared && (shared.permissions.edit || shared.permissions.rename)) canEdit = true;
-    }
-    if (!canEdit) return res.status(403).json({ error: 'No permission' });
-
-    Object.assign(calendar, req.body);
+    if (!calendar) return res.status(404).json({ message: 'Not found' });
+    if (calendar.owner.toString() !== req.user.id) return res.status(403).json({ message: 'Forbidden' });
+    calendar.name = name;
+    calendar.color = color;
     await calendar.save();
     res.json(calendar);
 });

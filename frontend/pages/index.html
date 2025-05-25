@@ -108,7 +108,7 @@
         <button id="closeEditModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl">
             <i class="fa-solid fa-xmark"></i>
         </button>
-        <h2 class="text-lg font-bold mb-4" style="color: #fff">Rediģēt kalendāru</h2>
+        <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">Rediģēt kalendāru</h2>
         <input type="text" id="editCalendarName" class="w-full mb-4 px-3 py-2 rounded-lg border" placeholder="Nosaukums">
         <div class="flex items-center gap-3 mb-4">
             <label for="editCalendarColor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
@@ -132,18 +132,22 @@
         <div class="mb-6 p-5 rounded-xl bg-gray-50 dark:bg-gray-700 flex flex-col gap-3 shadow-sm">
             <input type="email" id="shareEmail" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" placeholder="Lietotāja e-pasts">
             <div class="flex flex-col gap-2">
-                <label class="perm-label"><input type="checkbox" id="permEdit" class="mr-1 accent-blue-500"><i class="fa-solid fa-pen perm-icon text-gray-400"></i>Rediģēt</label>
-                <label class="perm-label"><input type="checkbox" id="permDelete" class="mr-1 accent-red-500"><i class="fa-solid fa-trash perm-icon text-gray-400"></i>Dzēst</label>
-                <label class="perm-label"><input type="checkbox" id="permRename" class="mr-1 accent-green-500"><i class="fa-solid fa-i-cursor perm-icon text-gray-400"></i>Pārsaukt</label>
-                <label class="perm-label"><input type="checkbox" id="permAddEvent" class="mr-1 accent-purple-500"><i class="fa-solid fa-calendar-plus perm-icon text-gray-400"></i>Pievienot notikumu</label>
-                <label class="perm-label"><input type="checkbox" id="permDeleteEvent" class="mr-1 accent-pink-500"><i class="fa-solid fa-calendar-xmark perm-icon text-gray-400"></i>Dzēst notikumu</label>
-                <label class="perm-label"><input type="checkbox" id="permEditEvent" class="mr-1 accent-yellow-500"><i class="fa-solid fa-pen perm-icon text-gray-400"></i>Rediģēt notikumu</label>
+                <label class="perm-label"><input type="checkbox" id="permEdit" class="mr-1"><i class="fa-solid fa-pen perm-icon"></i>Rediģēt</label>
+                <label class="perm-label"><input type="checkbox" id="permDelete" class="mr-1"><i class="fa-solid fa-trash perm-icon"></i>Dzēst</label>
+                <label class="perm-label"><input type="checkbox" id="permRename" class="mr-1"><i class="fa-solid fa-i-cursor perm-icon"></i>Pārsaukt</label>
+                <label class="perm-label"><input type="checkbox" id="permAddEvent" class="mr-1"><i class="fa-solid fa-calendar-plus perm-icon"></i>Pievienot notikumu</label>
+                <label class="perm-label"><input type="checkbox" id="permDeleteEvent" class="mr-1"><i class="fa-solid fa-calendar-xmark perm-icon"></i>Dzēst notikumu</label>
+                <label class="perm-label"><input type="checkbox" id="permEditEvent" class="mr-1"><i class="fa-solid fa-pen perm-icon"></i>Rediģēt notikumu</label>
             </div>
             <button id="addShareUser" class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold flex items-center gap-2 justify-center hover:bg-blue-700 transition">
                 <i class="fa-solid fa-user-plus"></i> Dalīties
             </button>
         </div>
         <hr class="my-4 border-gray-200 dark:border-gray-600">
+                <div class="mb-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
+            <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+            <input type="text" id="sharedUsersSearch" placeholder="Meklēt lietotāju..." class="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400" />
+        </div>
         <!-- Shared users list -->
         <div>
             <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 text-center">Dalīts ar:</h3>
@@ -415,40 +419,141 @@
             shareEmail.value = '';
             loadSharedUsers();
         };
+let allSharedUsers = []; // Store all users for filtering
+
 async function loadSharedUsers() {
     const token = localStorage.getItem('token');
     const res = await fetch(`/api/kalendars/${sharingCalendar._id}`, {
         headers: { 'Authorization': 'Bearer ' + token }
     });
     const cal = await res.json();
-    sharedUsersList.innerHTML = '';
-    (cal.sharedWith || []).forEach(sw => {
-        const div = document.createElement('div');
-        div.className = "flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2";
-        div.innerHTML = `
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-user text-gray-500"></i>
-                <span class="font-medium text-gray-800 dark:text-gray-100">${(sw.user.email || sw.user)}</span>
-            </div>
-        `;
-        const removeBtn = document.createElement('button');
-        removeBtn.className = "px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 text-xs flex items-center gap-1";
-        removeBtn.innerHTML = '<i class="fa-solid fa-user-xmark"></i> Noņemt';
-        removeBtn.onclick = async () => {
-            await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({ email: sw.user.email || sw.user })
-            });
-            loadSharedUsers();
-        };
-        div.appendChild(removeBtn);
-        sharedUsersList.appendChild(div);
-    });
+    allSharedUsers = cal.sharedWith || [];
+    renderSharedUsersList('');
 }
+
+function renderSharedUsersList(search) {
+    sharedUsersList.innerHTML = '';
+    const searchLower = search.trim().toLowerCase();
+    allSharedUsers
+        .filter(sw => {
+            const email = (sw.user.email || sw.user || '').toLowerCase();
+            const username = (sw.user.username || '').toLowerCase();
+            return !searchLower || email.includes(searchLower) || username.includes(searchLower);
+        })
+        .forEach(sw => {
+            const div = document.createElement('div');
+            div.className = "flex flex-col bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 mb-2";
+
+            const email = sw.user.email || sw.user;
+            const username = sw.user.username ? ` (${sw.user.username})` : '';
+
+            // Top row: user info and actions
+            const topRow = document.createElement('div');
+            topRow.className = "flex items-center justify-between";
+
+            topRow.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-user text-gray-500"></i>
+                    <span class="font-medium text-gray-800 dark:text-gray-100">${email}${username}</span>
+                </div>
+            `;
+
+            // Remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = "px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 text-xs flex items-center";
+            removeBtn.innerHTML = '<i class="fa-solid fa-user-xmark"></i>';
+            removeBtn.onclick = async () => {
+                const token = localStorage.getItem('token');
+                await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ email: sw.user.email || sw.user })
+                });
+                loadSharedUsers();
+            };
+            topRow.appendChild(removeBtn);
+
+            // Edit permissions button
+            const editBtn = document.createElement('button');
+            editBtn.className = "ml-2 px-2 py-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 text-xs flex items-center gap-1";
+            editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+            topRow.appendChild(editBtn);
+
+            div.appendChild(topRow);
+
+            // Permissions editor (hidden by default)
+            const permEditor = document.createElement('div');
+            permEditor.className = "flex flex-wrap gap-3 mt-2 items-center";
+            permEditor.style.display = "none";
+
+            // Permission checkboxes
+            const perms = [
+                { key: 'edit', label: 'Rediģēt' },
+                { key: 'delete', label: 'Dzēst' },
+                { key: 'rename', label: 'Pārsaukt' },
+                { key: 'addEvent', label: 'Pievienot notikumu' },
+                { key: 'deleteEvent', label: 'Dzēst notikumu' },
+                { key: 'editEvent', label: 'Rediģēt notikumu' }
+            ];
+            const permInputs = {};
+            perms.forEach(p => {
+                const label = document.createElement('label');
+                label.className = "flex items-center gap-1 text-sm";
+                const input = document.createElement('input');
+                input.type = "checkbox";
+                input.checked = sw.permissions && sw.permissions[p.key];
+                permInputs[p.key] = input;
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(p.label));
+                permEditor.appendChild(label);
+            });
+
+            // Save button
+            const saveBtn = document.createElement('button');
+            saveBtn.className = "ml-4 px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold";
+            saveBtn.textContent = "Saglabāt";
+            saveBtn.onclick = async () => {
+                const token = localStorage.getItem('token');
+                await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        email: sw.user.email || sw.user,
+                        permissions: {
+                            edit: permInputs.edit.checked,
+                            delete: permInputs.delete.checked,
+                            rename: permInputs.rename.checked,
+                            addEvent: permInputs.addEvent.checked,
+                            deleteEvent: permInputs.deleteEvent.checked,
+                            editEvent: permInputs.editEvent.checked
+                        }
+                    })
+                });
+                loadSharedUsers();
+            };
+            permEditor.appendChild(saveBtn);
+
+            div.appendChild(permEditor);
+
+            // Toggle permission editor
+            editBtn.onclick = () => {
+                permEditor.style.display = permEditor.style.display === "none" ? "flex" : "none";
+            };
+
+            sharedUsersList.appendChild(div);
+        });
+}
+
+// Add event listener for search
+document.getElementById('sharedUsersSearch').addEventListener('input', function() {
+    renderSharedUsersList(this.value);
+});
 
         fetchCalendars();
         });

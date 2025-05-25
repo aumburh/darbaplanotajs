@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
+// Register route
 router.post('/register', async (req, res) => {
     const { email, password, username } = req.body;
     if (!email || !password || !username) return res.status(400).json({ message: 'All fields required' });

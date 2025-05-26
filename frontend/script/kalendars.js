@@ -34,9 +34,7 @@
                             'Authorization': 'Bearer ' + localStorage.getItem('token')
                         }
                     });
-                    console.log('Calendar fetch status:', calRes.status);
                     const calData = await calRes.json();
-                    console.log('Calendar data:', calData);
 
                     if (!calRes.ok) throw new Error(calData.message || 'Failed to fetch calendar');
 
@@ -51,9 +49,7 @@
                             'Authorization': 'Bearer ' + localStorage.getItem('token')
                         }
                     });
-                    console.log('Events fetch status:', evRes.status);
                     events = await evRes.json();
-                    console.log('Events data:', events);
 
                     renderCalendar();
                 } catch (e) {

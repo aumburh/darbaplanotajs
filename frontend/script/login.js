@@ -24,7 +24,8 @@ function showLogin() {
             e.preventDefault();
             showLogin();
         };
-
+        
+// Handle login and registration forms 
         document.getElementById('login-form').addEventListener('submit', async function (e) {
             e.preventDefault();
             const identifier = document.getElementById('login-identifier').value.trim();

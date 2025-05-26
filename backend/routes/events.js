@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Event = require("../models/Event");
+const auth = require("../middleware/auth");
 
-// Create a new event
-router.post("/", async (req, res) => {
+// Create a new event (protected)
+router.post("/", auth, async (req, res) => {
   try {
     const newEvent = new Event(req.body);
     await newEvent.save();
@@ -13,8 +14,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get events for a calendar
-router.get("/:calendarId", async (req, res) => {
+// Get events for a calendar (protected)
+router.get("/:calendarId", auth, async (req, res) => {
   try {
     const events = await Event.find({ calendarId: req.params.calendarId });
     res.json(events);
@@ -23,8 +24,8 @@ router.get("/:calendarId", async (req, res) => {
   }
 });
 
-// Delete an event by ID
-router.delete("/:id", async (req, res) => {
+// Delete an event by ID (protected)
+router.delete("/:id", auth, async (req, res) => {
   try {
     await Event.findByIdAndDelete(req.params.id);
     res.json({ message: "Event deleted" });

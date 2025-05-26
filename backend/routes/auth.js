@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 const User = require("../models/User");
+const auth = require("../middleware/auth");
 
 // Register route
 router.post("/register", async (req, res) => {
@@ -13,7 +13,7 @@ router.post("/register", async (req, res) => {
   try {
     const exists = await User.findOne({ $or: [{ email }, { username }] });
     if (exists) return res.status(400).json({ message: "User already exists" });
-    const user = await User.create({ email, password, username });
+    await User.create({ email, password, username });
     res.status(201).json({ message: "User registered" });
   } catch (e) {
     console.error("Register error:", e);
@@ -24,45 +24,42 @@ router.post("/register", async (req, res) => {
 // Login route
 router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
-
-  console.log("Login attempt:", { identifier, password }); // Debug: log entered data
-
   if (!identifier || !password)
     return res.status(400).json({ message: "All fields required" });
 
-  const user = await User.findOne({
-    $or: [{ email: identifier }, { username: identifier }],
-  });
+  try {
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }],
+    });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-  console.log("User from DB:", user); // <-- Add this line to see the DB user and hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-  if (!user) return res.status(400).json({ message: "Invalid credentials" });
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-  const token = jwt.sign(
-    { id: user._id, email: user.email },
-    process.env.JWT_SECRET || "secret",
-    { expiresIn: "1d" }
-  );
-  res.json({ token });
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "1d" }
+    );
+    res.json({ token });
+  } catch (e) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// (Optional) Get current user info (protected)
-router.get("/me", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: "No token" });
-  const token = authHeader.split(" ")[1];
+// Get current user info (protected)
+router.get("/me", auth, async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
-  } catch {
+  } catch (e) {
     res.status(401).json({ message: "Invalid token" });
   }
 });
 
+// Logout (stateless)
 router.post("/logout", (req, res) => {
-  // For stateless JWT, just respond OK
   res.json({ message: "Logged out" });
 });
 

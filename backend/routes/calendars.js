@@ -3,6 +3,7 @@ const router = express.Router();
 const Calendar = require("../models/Calendar");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const Event = require("../models/Event");
 
 // Get all calendars for logged-in user (owned or shared)
 router.get("/", auth, async (req, res) => {
@@ -11,11 +12,26 @@ router.get("/", auth, async (req, res) => {
     const calendars = await Calendar.find({
       $or: [{ owner: userId }, { "sharedWith.user": userId }],
     });
-    res.json(calendars);
+
+    const calendarsWithCounts = await Promise.all(
+      calendars.map(async (calendar) => {
+        try {
+          const eventCount = await Event.countDocuments({ calendarId: calendar._id });
+          return { ...calendar.toObject(), eventCount };
+        } catch (err) {
+          console.error(`Error counting events for calendar ${calendar._id}:`, err);
+          return { ...calendar.toObject(), eventCount: 0 };
+        }
+      })
+    );
+
+    res.json(calendarsWithCounts);
   } catch (err) {
+    console.error("Server error in /api/kalendars:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // Get a single calendar (with shared users populated)
 router.get("/:id", auth, async (req, res) => {
@@ -72,14 +88,7 @@ router.post("/:id/share", auth, async (req, res) => {
 
     calendar.sharedWith.push({
       user: userToShare._id,
-      permissions: permissions || {
-        edit: true,
-        delete: false,
-        rename: false,
-        addEvent: true,
-        deleteEvent: true,
-        editEvent: true,
-      },
+      permissions: { ...(permissions || {}) }, // Default to empty permissions if not provided
     });
     await calendar.save();
     res.json({ message: "Calendar shared" });

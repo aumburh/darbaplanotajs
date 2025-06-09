@@ -2,193 +2,303 @@
 <html lang="lv">
 <head>
   <meta charset="UTF-8" />
-  <meta name="author" content="Rainers">
-  <meta name="last-modified-by" content="Rainers">
-  <meta name="last-modified" content="2025-05-25">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Darba Plānotājs</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="../style/index.css" />
-  <link rel="icon" type="image/png" href="/images/FAV.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/index.css">
+  <script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50: '#f0f9ff',
+            100: '#e0f2fe',
+            200: '#bae6fd',
+            300: '#7dd3fc',
+            400: '#38bdf8',
+            500: '#0ea5e9',
+            600: '#0284c7',
+            700: '#0369a1',
+            800: '#075985',
+            900: '#0c4a6e',
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        },
+        animation: {
+          'fade-in': 'fadeIn 0.3s ease-in-out',
+          'slide-up': 'slideUp 0.3s ease-out',
+        },
+        keyframes: {
+          fadeIn: {
+            '0%': { opacity: '0' },
+            '100%': { opacity: '1' },
+          },
+          slideUp: {
+            '0%': { transform: 'translateY(20px)', opacity: '0' },
+            '100%': { transform: 'translateY(0)', opacity: '1' },
+          }
+        }
+      }
+    }
+  }
+</script>
 </head>
-<body class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-
+<body class="min-h-screen flex flex-col">
   <!-- Header -->
-  <header class="sticky top-0 z-20 bg-white/90 dark:bg-gray-900/90 backdrop-blur shadow-sm">
-    <nav class="max-w-3xl mx-auto flex justify-between items-center py-4 px-6">
-      <h1 class="text-2xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300">
-        Darba Plānotājs
-      </h1>
-      <div class="flex items-center gap-3 w-2/3 max-w-md">
-        <div class="relative flex-1">
-          <input type="text" id="searchBar" placeholder="Meklēt..."
-            class="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 text-gray-700 dark:text-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </span>
+  <header class="sticky top-0 z-30 bg-white/80 dark:bg-surface-800/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-calendar-days text-primary-600 dark:text-primary-400 text-2xl mr-2"></i>
+            <h1 class="text-xl font-bold text-primary-600 dark:text-primary-400">Darba Plānotājs</h1>
+          </div>
         </div>
-        <button id="themeToggle"
-          class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 dark:text-white text-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900 transition"
-          aria-label="Pārslēgt tēmu">
-          <i id="themeIcon" class="fa-regular fa-moon text-xl"></i>
-        </button>
-        <button id="logoutButton"
-          class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold transition flex items-center gap-2"
-          aria-label="Izlogoties">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          Izlogoties
-        </button>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-search text-surface-400"></i>
+            </div>
+            <input type="text" id="searchBar" placeholder="Meklēt..."
+              class="pl-10 pr-4 py-2 rounded-lg bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64 transition">
+          </div>
+          <button id="logoutButton" class="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-medium transition px-4 py-2 rounded-lg">Izlogoties</button>
+        </div>
       </div>
-    </nav>
+    </div>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 flex flex-col items-center justify-start py-10 px-4 bg-gray-50 dark:bg-gray-900 transition">
-    <section class="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
-          Kalendāri
-        </h2>
-        <button id="addCalendar"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow transition">
-          <i class="fa-solid fa-plus"></i>
-          Pievienot kalendāru
-        </button>
+  <main class="flex-1 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row gap-8">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 flex-shrink-0">
+          <div class="card p-4 mb-6">
+            <button id="addCalendar" class="w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition">
+              <i class="fas fa-plus"></i>
+              <span>Jauns kalendārs</span>
+            </button>
+          </div>
+          <div class="card p-4">
+          <h2 class="font-semibold text-lg mb-4 text-surface-800 dark:text-surface-200">Filtri</h2>
+          <div id="filterContainer" class="space-y-2"></div>
+        </div>
+        </aside>
+
+        <!-- Calendar List -->
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-100">Mani kalendāri</h2>
+            <div class="relative">
+              <select id="sortCalendars" class="appearance-none bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-lg pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="newest">Jaunākie augšā</option>
+                <option value="oldest">Vecākie augšā</option>
+                <option value="name">Pēc nosaukuma</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <i class="fas fa-chevron-down text-surface-400 text-xs"></i>
+              </div>
+            </div>
+          </div>
+          <div id="calendarList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
       </div>
-      <div id="calendarList" class="flex flex-col gap-3 text-gray-800 dark:text-gray-100">
-        <!-- Calendar buttons will be injected here -->
-      </div>
-    </section>
+    </div>
   </main>
 
   <!-- Create Calendar Modal -->
-  <div id="calendarModal" class="hidden fixed inset-0 z-30 modal-bg flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-80 relative animate-fadeIn">
-      <button id="closeModal"
-        class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl"
-        aria-label="Aizvērt">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <h2 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
-        Izveidot kalendāru
-      </h2>
-      <form id="createCalendarForm">
-        <div class="mb-4">
-          <label for="calendarName"
-            class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Nosaukums</label>
-          <input type="text" id="calendarName" placeholder="Kalendāra nosaukums"
-            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition" />
+  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+  <div class="modal-content bg-white dark:bg-surface-900 rounded-lg shadow-xl w-full max-w-md p-6 animate-fade-in">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-surface-900 dark:text-surface-100">Jauns kalendārs</h2>
+          <button id="closeModal" data-modal="calendarModal" class="text-surface-400 hover:text-surface-600 dark:hover:text-surface-300">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <div class="mb-6 flex items-center gap-3">
-          <label for="calendarColor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
-          <button id="colorPreviewBtn" type="button"
-            class="inline-block w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 shadow transition"
-            style="background: #2563eb; border-width: 2px; border-color: #d1d5db;"></button>
-          <input type="color" id="calendarColor" class="absolute opacity-0 w-0 h-0" tabindex="-1" />
-        </div>
-        <button id="saveCalendar"
-          class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition mb-2">
-          Saglabāt
-        </button>
-      </form>
+        
+        <form id="createCalendarForm" class="space-y-4">
+          <div>
+            <label for="calendarName" class="block text-sm font-medium mb-1 text-surface-700 dark:text-surface-300">Nosaukums</label>
+            <input type="text" id="calendarName" placeholder="Kalendāra nosaukums" class="input-field">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1 text-surface-700 dark:text-surface-300">Krāsa</label>
+            <div class="flex gap-2">
+              <button type="button" data-color="#3b82f6" class="w-8 h-8 rounded-full border-2 border-surface-200 dark:border-surface-600 color-btn" style="background-color: #3b82f6"></button>
+              <button type="button" data-color="#10b981" class="w-8 h-8 rounded-full border-2 border-transparent color-btn" style="background-color: #10b981"></button>
+              <button type="button" data-color="#ef4444" class="w-8 h-8 rounded-full border-2 border-transparent color-btn" style="background-color: #ef4444"></button>
+              <button type="button" data-color="#f59e0b" class="w-8 h-8 rounded-full border-2 border-transparent color-btn" style="background-color: #f59e0b"></button>
+              <button type="button" data-color="#8b5cf6" class="w-8 h-8 rounded-full border-2 border-transparent color-btn" style="background-color: #8b5cf6"></button>
+              <button type="button" data-color="#ec4899" class="w-8 h-8 rounded-full border-2 border-transparent color-btn" style="background-color: #ec4899"></button>
+            </div>
+            <input type="hidden" id="calendarColor" value="#3b82f6">
+          </div>
+          
+          <div class="pt-2 flex justify-end gap-3">
+            <button type="button" id="cancelCreate" class="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-medium transition">Atcelt</button>
+            <button type="button" id="saveCalendar" class="px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 font-medium transition">Izveidot</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-
   <!-- Edit Calendar Modal -->
-  <div id="editCalendarModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-80 relative">
-      <button id="closeEditModal"
-        class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl"
-        aria-label="Aizvērt">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">
-        Rediģēt kalendāru
-      </h2>
-      <form id="editCalendarForm">
-        <input type="text" id="editCalendarName"
-          class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition mb-2"
-          placeholder="Nosaukums" />
-        <div class="flex items-center gap-3 mb-4">
-          <label for="editCalendarColor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Krāsa</label>
-          <button id="editColorPreviewBtn" type="button"
-            class="inline-block w-8 h-8 rounded-full border-2 border-gray-300 shadow transition"
-            style="background: #2563eb; border-width: 2px; border-color: #d1d5db;"></button>
-          <input type="color" id="editCalendarColor" class="absolute opacity-0 w-0 h-0" tabindex="-1" />
+<div id="editCalendarModal" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex justify-end transition-opacity duration-300">
+  <div class="w-full max-w-xl bg-white dark:bg-surface-900 h-full flex flex-col shadow-xl border-l border-gray-200 dark:border-surface-700 overflow-y-auto transform translate-x-full transition-transform duration-300 ease-out rounded-l-xl">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-surface-900 dark:text-surface-100">Rediģēt kalendāru</h2>
+          <p id="editModalCalendarName" class="text-sm text-primary-600 dark:text-primary-400 italic truncate mt-1"></p>
         </div>
-        <button id="saveEditCalendar"
-          class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">
-          Saglabāt
+        <button id="closeEditModal" data-modal="editCalendarModal" class="text-surface-400 hover:text-surface-600 dark:hover:text-surface-300">
+          <i class="fas fa-times"></i>
         </button>
+      </div>
+
+      <form id="editCalendarForm" class="space-y-4">
+        <div>
+          <label for="editCalendarName" class="block text-sm font-medium mb-1 text-surface-700 dark:text-surface-300">Nosaukums</label>
+          <input type="text" id="editCalendarName" placeholder="Kalendāra nosaukums" class="input-field">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1 text-surface-700 dark:text-surface-300">Krāsa</label>
+          <div class="flex gap-2">
+            <button type="button" data-color="#3b82f6" class="w-8 h-8 rounded-full border-2 border-surface-200 dark:border-surface-600 edit-color-btn" style="background-color: #3b82f6"></button>
+              <button type="button" data-color="#10b981" class="w-8 h-8 rounded-full border-2 border-transparent edit-color-btn" style="background-color: #10b981"></button>
+              <button type="button" data-color="#ef4444" class="w-8 h-8 rounded-full border-2 border-transparent edit-color-btn" style="background-color: #ef4444"></button>
+              <button type="button" data-color="#f59e0b" class="w-8 h-8 rounded-full border-2 border-transparent edit-color-btn" style="background-color: #f59e0b"></button>
+              <button type="button" data-color="#8b5cf6" class="w-8 h-8 rounded-full border-2 border-transparent edit-color-btn" style="background-color: #8b5cf6"></button>
+              <button type="button" data-color="#ec4899" class="w-8 h-8 rounded-full border-2 border-transparent edit-color-btn" style="background-color: #ec4899"></button>
+          </div>
+          <input type="hidden" id="editCalendarColor" value="#3b82f6">  
+        </div>
+
+        <div class="pt-2 flex justify-end gap-3">
+          <button type="button" id="cancelEdit" class="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-medium transition">Atcelt</button>
+          <button type="button" id="saveEditCalendar" class="px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 font-medium transition">Saglabāt</button>
+        </div>
       </form>
     </div>
   </div>
+</div>
+
 
   <!-- Share Calendar Modal -->
-  <div id="shareCalendarModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center"> 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md relative transition-all duration-300 animate-fadeIn">
-      <button id="closeShareModal"
-        class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl transition-colors"
-        aria-label="Aizvērt">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center">
-        Dalīties ar kalendāru
-      </h2>
-      <div class="mb-6 p-5 rounded-xl bg-gray-50 dark:bg-gray-700 flex flex-col gap-3 shadow-sm">
-        <input type="email" id="shareEmail"
-          class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-light-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-          placeholder="Lietotāja e-pasts" />
-        <div class="flex flex-col gap-2 text-gray dark:text-gray-300">
-          <label class="perm-label">
-            <input type="checkbox" id="permEdit" class="mr-1" />
-            <i class="fa-solid fa-pencil-ruler perm-icon"></i>Rediģēt kalendāru
-          </label>
-          <label class="perm-label">
-            <input type="checkbox" id="permDelete" class="mr-1" />
-            <i class="fa-solid fa-trash-can perm-icon"></i>Dzēst kalendāru
-          </label>
-          <label class="perm-label">
-            <input type="checkbox" id="permRename" class="mr-1" />
-            <i class="fa-solid fa-signature perm-icon"></i>Pārsaukt kalendāru
-          </label>
-          <label class="perm-label">
-            <input type="checkbox" id="permAddEvent" class="mr-1" />
-            <i class="fa-solid fa-calendar-plus perm-icon"></i>Pievienot notikumu
-          </label>
-          <label class="perm-label">
-            <input type="checkbox" id="permDeleteEvent" class="mr-1" />
-            <i class="fa-solid fa-calendar-xmark perm-icon"></i>Dzēst notikumu
-          </label>
-          <label class="perm-label">
-            <input type="checkbox" id="permEditEvent" class="mr-1" />
-            <i class="fa-solid fa-pen-to-square perm-icon"></i>Rediģēt notikumu
-          </label>
+<div id="shareCalendarModal" class="hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex justify-end transition-opacity duration-300">
+  <div class="w-full max-w-xl bg-white dark:bg-surface-900 h-full flex flex-col shadow-xl border-l border-gray-200 dark:border-surface-700 overflow-y-auto transform translate-x-full transition-transform duration-300 ease-out rounded-l-xl">
+    <div class="p-6 space-y-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-surface-900 dark:text-surface-100">Dalīties ar kalendāru</h2>
+          <p id="shareModalCalendarName" class="text-sm text-primary-600 dark:text-primary-400 italic truncate mt-1"></p>
         </div>
-        <button id="addShareUser"
-          class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold flex items-center gap-2 justify-center hover:bg-blue-700 transition">
-          <i class="fa-solid fa-user-plus"></i> Dalīties
+        <button id="closeShareModal" data-modal="shareCalendarModal" class="text-surface-400 hover:text-surface-600 dark:hover:text-surface-300">
+          <i class="fas fa-times"></i>
         </button>
-        <div id="shareError" class="text-red-600 text-sm mb-2 hidden"></div>  
       </div>
-      <div id="calendarOwnerInfo" class="text-xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center"></div>
-      <hr class="my-4 border-gray-200 dark:border-gray-600" />
-      <div class="mb-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
-        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-        <input type="text" id="sharedUsersSearch" placeholder="Meklēt lietotāju..."
-          class="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400" />
+
+      <div class="card p-4">
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="shareEmail" class="block text-sm font-medium mb-1 text-surface-700 dark:text-surface-300">Pievienot lietotāju</label>
+            <input type="text" id="shareEmail" placeholder="lietotāja@epasts.lv" class="input-field">
+          </div>
+          <button id="addShareUser" class="px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 font-medium transition">Pievienot</button>
+        </div>
+        <div id="shareError" class="text-red-600 text-sm mt-2 hidden"></div>
+
+<div class="mb-6 mt-4">
+  <h3 class="text-sm font-medium mb-2 text-surface-700 dark:text-surface-300">Atļaujas</h3>
+  <div class="grid grid-cols-2 gap-3">
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="permEdit" class="peer hidden">
+      <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+        <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
       </div>
+      <span class="text-sm text-gray-700 dark:text-gray-300">Rediģēt kalendāru</span>
+    </label>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="permDelete" class="peer hidden">
+      <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+        <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
+      </div>
+      <span class="text-sm text-gray-700 dark:text-gray-300">Dzēst kalendāru</span>
+    </label>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="permRename" class="peer hidden">
+      <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+        <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
+      </div>
+      <span class="text-sm text-gray-700 dark:text-gray-300">Pārsaukt kalendāru</span>
+    </label>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="permAddEvent" class="peer hidden">
+      <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+        <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
+      </div>
+      <span class="text-sm text-gray-700 dark:text-gray-300">Pievienot notikumu</span>
+    </label>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="permDeleteEvent" class="peer hidden">
+      <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+        <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
+      </div>
+      <span class="text-sm text-gray-700 dark:text-gray-300">Dzēst notikumu</span>
+    </label>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="permEditEvent" class="peer hidden">
+      <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+        <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
+      </div>
+      <span class="text-sm text-gray-700 dark:text-gray-300">Rediģēt notikumu</span>
+    </label>
+  </div>
+</div>
+
+
       <div>
-        <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 text-center">
-          Dalīts ar:
-        </h3>
-        <div id="sharedUsersList" class="flex flex-col gap-2"></div>
+        <h3 class="font-medium text-base mb-2 text-surface-800">Koplietotie lietotāji</h3>
+        <div class="mb-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
+          <i class="fas fa-magnifying-glass text-gray-400"></i>
+          <input type="text" id="sharedUsersSearch" placeholder="Meklēt lietotāju..." class="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400" />
+        </div>
+        <div id="sharedUsersList" class="space-y-4 overflow-y-auto pr-1 max-h-[300px]"></div>
       </div>
     </div>
   </div>
+</div>
 
-  <script src="../script/index.js"></script>
+  <div id="confirmationModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+  <div class="bg-white dark:bg-surface-900 rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in space-y-5">
+    <div class="text-center space-y-3">
+      <h3 id="confirmTitle" class="text-lg font-semibold text-surface-900 dark:text-white">Vai tiešām?</h3>
+      <p id="confirmMessage" class="text-sm text-gray-600 dark:text-gray-300">Apstipriniet darbību, lai turpinātu.</p>
+    </div>
+    <div class="flex justify-end gap-3">
+      <button id="confirmCancel" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-surface-700 hover:bg-gray-200 dark:hover:bg-surface-600 text-gray-700 dark:text-gray-200">Atcelt</button>
+      <button id="confirmAccept" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">Apstiprināt</button>
+    </div>
+  </div>
+</div>
+
+  <script src="script/index.js"></script>
 </body>
 </html>

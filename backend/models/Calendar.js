@@ -8,12 +8,12 @@ const CalendarSchema = new mongoose.Schema({
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       permissions: {
-        edit: { type: Boolean, default: true },
+        edit: { type: Boolean, default: false },
         delete: { type: Boolean, default: false },
         rename: { type: Boolean, default: false },
-        addEvent: { type: Boolean, default: true },
-        deleteEvent: { type: Boolean, default: true },
-        editEvent: { type: Boolean, default: true },
+        addEvent: { type: Boolean, default: false },
+        deleteEvent: { type: Boolean, default: false },
+        editEvent: { type: Boolean, default: false },
       },
     },
   ],

@@ -1,13 +1,43 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class', // Ensure it's using the class strategy for dark mode
+  content: [
+    './index.html',
+    './script/**/*.js', // adjust if your JS is elsewhere
+    './components/**/*.{js,ts,vue,html}', // optional
+  ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        'forest-green': '#228B22', // Main theme color for both modes
-        'light-background': '#f8f8f8', // Light mode background color
-        'light-text': '#2d2d2d', // Light mode text color
-        'dark-background': '#1a202c', // Dark mode background color
-        'dark-text': '#e2e8f0', // Dark mode text color
+        primary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-in-right': 'slideInRight 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
       },
     },
   },

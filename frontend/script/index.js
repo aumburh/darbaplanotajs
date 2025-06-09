@@ -1,468 +1,560 @@
-  /*
-    Author: Rainers
-    Last Modified By: Rainers
-    Last Modified: 2025-05-25
-  */
+/*
+  Author: Rainers
+  Enhanced Final Version by ChatGPT
+  Last Updated: 2025-06-09
+*/
 
-  // Check authentication and fetch user info before anything else
-  async function ensureAuthenticated() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = '/login';
-      return null;
-    }
-    const res = await fetch('/api/auth/me', {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    });
-    if (res.ok) {
-      const user = await res.json();
-      return user;
-    } else {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      return null;
-    }
+let allCalendars = [];
+let editingCalendarId = null;
+let sharingCalendar = null;
+let user = null;
+let currentFilter = 'mine'; // Default filter
+
+
+async function ensureAuthenticated() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/login';
+    return null;
   }
+  const res = await fetch('/api/auth/me', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  if (res.ok) return await res.json();
+  localStorage.removeItem('token');
+  window.location.href = '/login';
+  return null;
+}
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    const user = await ensureAuthenticated();
-    if (!user) return;
+function setFilter(filter) {
+  currentFilter = filter;
+  createFilterButtons();
+  renderCalendarList();
+}
 
-    let allCalendars = [];
+function createFilterButtons() {
+  const container = document.getElementById('filterContainer');
+  if (!container) return;
+  container.innerHTML = '';
 
-    // Tailwind dark mode config
-    if (window.tailwind) tailwind.config = { darkMode: 'class' };
+  const filters = [
+    { id: 'mine', label: 'Personīgie' },
+    { id: 'shared', label: 'Koplietotie' },
+    { id: 'all', label: 'Visi' }
+  ];
 
-    // DOM elements
-    const colorPreviewBtn = document.getElementById('colorPreviewBtn');
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const body = document.body;
-    const addCalendar = document.getElementById('addCalendar');
-    const calendarList = document.getElementById('calendarList');
-    const calendarModal = document.getElementById('calendarModal');
-    const closeModal = document.getElementById('closeModal');
-    const saveCalendar = document.getElementById('saveCalendar');
-    const calendarName = document.getElementById('calendarName');
-    const colorInput = document.getElementById('calendarColor');
-    const editColorPreviewBtn = document.getElementById('editColorPreviewBtn');
-    const editCalendarColor = document.getElementById('editCalendarColor');
-    const editCalendarModal = document.getElementById('editCalendarModal');
-    const editCalendarName = document.getElementById('editCalendarName');
-    const saveEditCalendar = document.getElementById('saveEditCalendar');
-    const closeEditModal = document.getElementById('closeEditModal');
-    let editingCalendarId = null;
-    let sharingCalendar = null;
-    const shareCalendarModal = document.getElementById('shareCalendarModal');
-    const closeShareModal = document.getElementById('closeShareModal');
-    const shareEmail = document.getElementById('shareEmail');
-    const permEdit = document.getElementById('permEdit');
-    const permDelete = document.getElementById('permDelete');
-    const permRename = document.getElementById('permRename');
-    const permAddEvent = document.getElementById('permAddEvent');
-    const permDeleteEvent = document.getElementById('permDeleteEvent');
-    const permEditEvent = document.getElementById('permEditEvent');
-    const addShareUser = document.getElementById('addShareUser');
-    const sharedUsersList = document.getElementById('sharedUsersList');
-    const searchBar = document.getElementById('searchBar');
-    const logoutButton = document.getElementById('logoutButton');
+  filters.forEach(({ id, label }) => {
+    const isActive = currentFilter === id;
+    const btn = document.createElement('button');
+    btn.textContent = label;
+      btn.className = `
+        w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition
+        ${isActive 
+          ? 'bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-100 font-semibold border-l-4 border-primary-500 pl-3'
+          : 'hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300'}
+      `.trim();
+    btn.addEventListener('click', () => setFilter(id));
+    container.appendChild(btn);
+  });
+}
 
-    // Color preview for add modal
-    if (colorPreviewBtn && colorInput) {
-      colorPreviewBtn.addEventListener('click', () => colorInput.click());
-      colorInput.addEventListener('input', () => {
-        colorPreviewBtn.style.background = colorInput.value;
-      });
-    }
+function showConfirmationModal({ title, message, onConfirm }) {
+  const modal = document.getElementById('confirmationModal');
+  const titleEl = document.getElementById('confirmTitle');
+  const messageEl = document.getElementById('confirmMessage');
+  const cancelBtn = document.getElementById('confirmCancel');
+  const acceptBtn = document.getElementById('confirmAccept');
 
-    // Color preview for edit modal
-    if (editColorPreviewBtn && editCalendarColor) {
-      editColorPreviewBtn.addEventListener('click', () => editCalendarColor.click());
-      editCalendarColor.addEventListener('input', () => {
-        editColorPreviewBtn.style.background = editCalendarColor.value;
-      });
-    }
+  titleEl.textContent = title;
+  messageEl.textContent = message;
 
-    function openEditModal(calendar) {
-      editingCalendarId = calendar._id;
-      editCalendarName.value = calendar.name;
-      editCalendarColor.value = calendar.color;
-      editColorPreviewBtn.style.background = calendar.color;
-      editCalendarModal.classList.remove('hidden');
-    }
+  modal.classList.remove('hidden');
 
-    if (closeEditModal) closeEditModal.onclick = () => editCalendarModal.classList.add('hidden');
-    if (saveEditCalendar) saveEditCalendar.onclick = async () => {
-      const token = localStorage.getItem('token');
-      await fetch(`/api/kalendars/${editingCalendarId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          name: editCalendarName.value,
-          color: editCalendarColor.value
-        })
-      });
-      editCalendarModal.classList.add('hidden');
-      fetchCalendars();
-    };
-
-    // Theme toggle
-    if (themeToggle && themeIcon) {
-      themeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark');
-        themeIcon.className = body.classList.contains('dark')
-          ? 'fa-solid fa-sun text-xl'
-          : 'fa-regular fa-moon text-xl';
-        localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
-      });
-      if (localStorage.getItem('theme') === 'dark') {
-        body.classList.add('dark');
-        themeIcon.className = 'fa-solid fa-sun text-xl';
-      } else {
-        themeIcon.className = 'fa-regular fa-moon text-xl';
-      }
-    }
-
-    // Modal open/close
-    if (addCalendar && calendarModal && calendarName) {
-      addCalendar.addEventListener('click', () => {
-        calendarModal.classList.remove('hidden');
-        setTimeout(() => calendarName.focus(), 100);
-      });
-    }
-    if (closeModal && calendarModal) closeModal.addEventListener('click', () => {
-      calendarModal.classList.add('hidden');
-    });
-    window.addEventListener('keydown', (e) => {
-      if (calendarModal && !calendarModal.classList.contains('hidden') && e.key === 'Escape') {
-        calendarModal.classList.add('hidden');
-      }
-      if (editCalendarModal && !editCalendarModal.classList.contains('hidden') && e.key === 'Escape') {
-        editCalendarModal.classList.add('hidden');
-      }
-      if (shareCalendarModal && !shareCalendarModal.classList.contains('hidden') && e.key === 'Escape') {
-        shareCalendarModal.classList.add('hidden');
-      }
-    });
-
-    // Add calendar
-    if (saveCalendar) saveCalendar.addEventListener('click', async () => {
-      const name = calendarName.value.trim();
-      const color = colorInput.value || '#2563eb';
-      if (!name) return;
-
-      const newCalendar = { name, color };
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/kalendars', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify(newCalendar)
-        });
-        calendarModal.classList.add('hidden');
-        calendarName.value = "";
-        colorInput.value = "#2563eb";
-        fetchCalendars();
-      } catch (error) {
-        alert('Neizdevās izveidot kalendāru.');
-      }
-    });
-
-    // Render calendar button
-    function addCalendarButton(calendar) {
-      const btn = document.createElement('div');
-      btn.className = 'calendar-button flex items-center gap-4 px-0 py-0 rounded-xl font-semibold shadow bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-700 transition overflow-hidden relative group';
-      btn.style.minHeight = '60px';
-
-      // Color circle
-      const colorCircle = document.createElement('span');
-      colorCircle.className = 'inline-block w-5 h-5 rounded-full border-2 border-white shadow mr-3 ml-4';
-      colorCircle.style.backgroundColor = calendar.color;
-      btn.appendChild(colorCircle);
-
-      // Calendar name (click to open)
-      const nameBtn = document.createElement('button');
-      nameBtn.textContent = calendar.name;
-      nameBtn.className = 'flex-1 text-left px-6 py-4 text-lg font-medium hover:underline';
-      nameBtn.onclick = () => window.location.href = `/kalendars/${calendar._id}`;
-      btn.appendChild(nameBtn);
-
-      // Actions
-      const actions = document.createElement('div');
-      actions.className = 'flex items-center gap-2 pr-4';
-
-      // Edit button
-      const editBtn = document.createElement('button');
-      editBtn.title = 'Rediģēt';
-      editBtn.className = 'text-blue-500 hover:text-blue-700 p-2 rounded transition';
-      editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-      editBtn.onclick = () => openEditModal(calendar);
-      actions.appendChild(editBtn);
-
-      // Delete button
-      const delBtn = document.createElement('button');
-      delBtn.title = 'Dzēst';
-      delBtn.className = 'text-red-500 hover:text-red-700 p-2 rounded transition';
-      delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-      delBtn.onclick = async () => {
-        if (confirm('Dzēst šo kalendāru?')) {
-          const token = localStorage.getItem('token');
-          await fetch(`/api/kalendars/${calendar._id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
-          });
-          fetchCalendars();
-        }
-      };
-      actions.appendChild(delBtn);
-
-      // Share button
-      const shareBtn = document.createElement('button');
-      shareBtn.title = 'Dalīties';
-      shareBtn.className = 'text-green-500 hover:text-green-700 p-2 rounded transition';
-      shareBtn.innerHTML = '<i class="fa-solid fa-user-group"></i>';
-      shareBtn.onclick = () => openShareModal(calendar);
-      actions.appendChild(shareBtn);
-
-      btn.appendChild(actions);
-      calendarList.appendChild(btn);
-    }
-
-    // Fetch calendars
-    async function fetchCalendars() {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/kalendars', {
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
-        });
-        allCalendars = await response.json();
-        calendarList.innerHTML = '';
-        allCalendars.forEach(addCalendarButton);
-      } catch (error) {
-        calendarList.innerHTML = '<span class="text-red-500">Neizdevās ielādēt kalendārus.</span>';
-      }
-    }
-
-    // Search bar
-    if (searchBar) searchBar.addEventListener('input', () => {
-      const query = searchBar.value.trim().toLowerCase();
-      calendarList.innerHTML = '';
-      allCalendars
-        .filter(cal => cal.name.toLowerCase().includes(query))
-        .forEach(addCalendarButton);
-    });
-
-    // Logout
-    if (logoutButton) logoutButton.addEventListener('click', () => {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    });
-
-    // Share modal logic
-    function openShareModal(calendar) {
-      sharingCalendar = calendar;
-      shareCalendarModal.classList.remove('hidden');
-      loadSharedUsers();
-    }
-    if (closeShareModal) closeShareModal.onclick = () => shareCalendarModal.classList.add('hidden');
-    if (addShareUser) addShareUser.onclick = async () => {
-    const token = localStorage.getItem('token');
-    const errorDiv = document.getElementById('shareError');
-    errorDiv.classList.add('hidden');
-    errorDiv.textContent = '';
-
-    const response = await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({
-        identifier: shareEmail.value,
-        permissions: {
-          edit: permEdit.checked,
-          delete: permDelete.checked,
-          rename: permRename.checked,
-          addEvent: permAddEvent.checked,
-          deleteEvent: permDeleteEvent.checked,
-          editEvent: permEditEvent.checked
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      errorDiv.textContent = data.error || data.message || 'Nezināma kļūda';
-      errorDiv.classList.remove('hidden');
-      return;
-    }
-
-    shareEmail.value = '';
-    loadSharedUsers();
+  const cleanup = () => {
+    modal.classList.add('hidden');
+    acceptBtn.removeEventListener('click', handleAccept);
+    cancelBtn.removeEventListener('click', handleCancel);
   };
-    let allSharedUsers = [];
 
-        async function loadSharedUsers() {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`/api/kalendars/${sharingCalendar._id}`, {
-            headers: { 'Authorization': 'Bearer ' + token }
-          });
-          const cal = await res.json();
-          sharingCalendar.owner = cal.owner._id;
-          sharingCalendar.ownerInfo = cal.owner;
-          allSharedUsers = cal.sharedWith || [];
-          showCalendarOwner(cal);
-          renderSharedUsersList('');
-        }
+  const handleAccept = () => {
+    cleanup();
+    if (onConfirm) onConfirm();
+  };
 
-        function showCalendarOwner(cal) {
-          const ownerInfo = document.getElementById('calendarOwnerInfo');
-          if (!ownerInfo) return;
-          if (!cal.owner || typeof cal.owner !== 'object') {
-            ownerInfo.textContent = 'Īpašnieks: nezināms';
-            return;
-          }
-          const name = cal.owner.username || 'Nezināms lietotājvārds';
-          const email = cal.owner.email || 'Nezināms e-pasts';
-          ownerInfo.textContent = `Īpašnieks: ${email} (${name})`;
-        }
+  const handleCancel = () => cleanup();
 
+  acceptBtn.addEventListener('click', handleAccept);
+  cancelBtn.addEventListener('click', handleCancel);
+}
 
-function renderSharedUsersList(search) {
-  sharedUsersList.innerHTML = '';
-  const searchLower = search.trim().toLowerCase();
-  allSharedUsers
-    .filter(sw => {
-      const email = (sw.user.email || sw.user || '').toLowerCase();
-      const username = (sw.user.username || '').toLowerCase();
-      return !searchLower || email.includes(searchLower) || username.includes(searchLower);
+function renderSharedUsers(users, searchTerm = '', list, currentUserId, calendar) {
+  list.innerHTML = '';
+
+  users
+    .filter(entry => {
+      const sharedUser = entry.user;
+      const display = sharedUser.email || sharedUser.username || '';
+      return display.toLowerCase().includes(searchTerm);
     })
-    .forEach(sw => {
-      const div = document.createElement('div');
-      div.className = "flex flex-col bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 mb-2";
+    .forEach(entry => {
+      const sharedUser = entry.user;
+      const permissions = entry.permissions || {};
+      const isSelf = sharedUser._id === currentUserId;
 
-      const email = sw.user.email || sw.user;
-      const username = sw.user.username ? ` (${sw.user.username})` : '';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex flex-col gap-3 p-4 mb-4 rounded-xl border border-gray-200 dark:border-surface-600 bg-white dark:bg-surface-800 shadow-sm';
 
-      // Top row: user info and actions
-      const topRow = document.createElement('div');
-      topRow.className = "flex items-center justify-between";
-      topRow.innerHTML = `
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-user text-gray-500"></i>
-          <span class="font-medium text-gray-800 dark:text-gray-100">${email}${username}</span>
+      wrapper.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-medium text-surface-800 dark:text-white text-sm">${sharedUser.email || sharedUser.username}</div>
+          ${isSelf ? '' : `<button data-user="${sharedUser._id}" class="remove-user-btn text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>`}
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          ${Object.entries(permissions).map(([key, val]) => {
+            const id = `perm_${sharedUser._id}_${key}`;
+            return `
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" id="${id}" class="peer hidden perm-checkbox" data-user="${sharedUser._id}" data-perm="${key}" ${val ? 'checked' : ''} ${isSelf ? 'disabled' : ''}>
+                <div class="w-5 h-5 border-2 border-gray-300 rounded-md flex items-center justify-center peer-checked:bg-primary-500 peer-checked:border-primary-500 transition">
+                  <i class="fas fa-check text-white text-xs hidden peer-checked:inline-block"></i>
+                </div>
+                <span class="text-sm text-gray-700 dark:text-gray-300">${key}</span>
+              </label>
+            `;
+          }).join('')}
         </div>
       `;
 
-      const isSelf = (sw.user._id || sw.user) === user._id;
-      const isOwner = sharingCalendar.owner === user._id;
-
-      if (!isSelf || isOwner) {
-        const removeBtn = document.createElement('button');
-        removeBtn.className = "px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 text-xs flex items-center";
-        removeBtn.innerHTML = '<i class="fa-solid fa-user-xmark"></i>';
-        removeBtn.onclick = async () => {
-          const token = localStorage.getItem('token');
-          await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({ identifier: sw.user.email || sw.user })
-          });
-          loadSharedUsers();
-        };
-        topRow.appendChild(removeBtn);
-      }
-
-      if (!isSelf || isOwner) {
-        const editBtn = document.createElement('button');
-        editBtn.className = "ml-2 px-2 py-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 text-xs flex items-center gap-1";
-        editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-        topRow.appendChild(editBtn);
-
-        const permEditor = document.createElement('div');
-        permEditor.className = "flex flex-wrap gap-3 mt-2 items-center";
-        permEditor.style.display = "none";
-
-        const perms = [
-          { key: 'edit', label: 'Rediģēt' },
-          { key: 'delete', label: 'Dzēst' },
-          { key: 'rename', label: 'Pārsaukt' },
-          { key: 'addEvent', label: 'Pievienot notikumu' },
-          { key: 'deleteEvent', label: 'Dzēst notikumu' },
-          { key: 'editEvent', label: 'Rediģēt notikumu' }
-        ];
-        const permInputs = {};
-        perms.forEach(p => {
-          const label = document.createElement('label');
-          label.className = "flex items-center gap-1 text-sm";
-          const input = document.createElement('input');
-          input.type = "checkbox";
-          input.checked = sw.permissions && sw.permissions[p.key];
-          permInputs[p.key] = input;
-          label.appendChild(input);
-          label.appendChild(document.createTextNode(p.label));
-          permEditor.appendChild(label);
-        });
-
-        const saveBtn = document.createElement('button');
-        saveBtn.className = "ml-4 px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold";
-        saveBtn.textContent = "Saglabāt";
-        saveBtn.onclick = async () => {
-          const token = localStorage.getItem('token');
-          await fetch(`/api/kalendars/${sharingCalendar._id}/share`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({
-              identifier: sw.user.email || sw.user,
-              permissions: {
-                edit: permInputs.edit.checked,
-                delete: permInputs.delete.checked,
-                rename: permInputs.rename.checked,
-                addEvent: permInputs.addEvent.checked,
-                deleteEvent: permInputs.deleteEvent.checked,
-                editEvent: permInputs.editEvent.checked
-              }
-            })
-          });
-          loadSharedUsers();
-        };
-        permEditor.appendChild(saveBtn);
-
-        div.appendChild(permEditor);
-        editBtn.onclick = () => {
-          permEditor.style.display = permEditor.style.display === "none" ? "flex" : "none";
-        };
-      }
-
-      div.appendChild(topRow);
-      sharedUsersList.appendChild(div);
+      list.appendChild(wrapper);
     });
+
+  // Set up permission update handlers
+  list.querySelectorAll('.perm-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', async () => {
+      const userId = checkbox.dataset.user;
+      const identifier = users.find(sw => sw.user._id === userId)?.user.email || userId;
+      const updated = {};
+      list.querySelectorAll(`input[data-user='${userId}']`).forEach(cb => {
+        updated[cb.dataset.perm] = cb.checked;
+      });
+      await fetch(`/api/kalendars/${calendar._id}/share`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({ identifier, permissions: updated })
+      });
+    });
+  });
+
+  // Set up remove button handlers
+  list.querySelectorAll('.remove-user-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+  const identifier = users.find(sw => sw.user._id === btn.dataset.user)?.user.email;
+  if (!identifier) return;
+  showConfirmationModal({
+    title: 'Noņemt lietotāju?',
+    message: `Vai tiešām vēlaties noņemt "${identifier}" no šī kalendāra?`,
+    onConfirm: async () => {
+      await fetch(`/api/kalendars/${calendar._id}/share`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({ identifier })
+      });
+      await loadSharedUsers(calendar._id);
+    }
+  });
+  await loadSharedUsers(calendar._id); // Refresh after removal
+});
+  });
 }
 
 
-    // Add event listener for search
-    const sharedUsersSearch = document.getElementById('sharedUsersSearch');
-    if (sharedUsersSearch) {
-      sharedUsersSearch.addEventListener('input', function () {
-        renderSharedUsersList(this.value);
-      });
-    }
+function renderCalendarList() {
+  const calendarList = document.getElementById('calendarList');
+  if (!calendarList) return;
+  calendarList.innerHTML = '';
+  let filtered = [...allCalendars];
+  if (currentFilter === 'mine') {
+    filtered = filtered.filter(c => c.owner === user._id);
+  } else if (currentFilter === 'shared') {
+    filtered = filtered.filter(c => c.sharedWith?.some(sw => sw.user === user._id));
+  }
+  const searchBar = document.getElementById('searchBar');
+  const sortCalendars = document.getElementById('sortCalendars');
+  if (searchBar?.value.trim()) {
+    const term = searchBar.value.toLowerCase();
+    filtered = filtered.filter(c => c.name.toLowerCase().includes(term));
+  }
+  switch (sortCalendars?.value) {
+    case 'newest': filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); break;
+    case 'oldest': filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); break;
+    case 'name': filtered.sort((a, b) => a.name.localeCompare(b.name)); break;
+  }
+  if (filtered.length === 0) {
+    calendarList.innerHTML = '<p class="text-surface-500">Nav atrastu kalendāru</p>';
+  } else {
+    filtered.forEach(c => calendarList.appendChild(renderCalendar(c)));
+  }
+}
 
-    fetchCalendars();
+function formatEventLabel(count) {
+  if (count > 9) return '9+ notikumi';
+  if (count === 0) return '0 notikumu';
+  if (count === 1) return '1 notikums';
+  if (count >= 2 && count <= 9) return `${count} notikumi`;
+}
+
+function renderCalendar(calendar) {
+
+const eventCount = calendar.eventCount || 0;
+const label = formatEventLabel(eventCount);
+
+  const el = document.createElement('div');
+  
+  el.className = 'bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl px-5 py-4 transition hover:shadow-sm flex flex-col gap-2';
+  el.innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full" style="background-color: ${calendar.color}"></div>
+        <h3 class="text-base font-medium text-surface-900 dark:text-surface-100 cursor-pointer hover:underline calendar-name">${calendar.name}</h3>
+      </div>
+      <div class="relative">
+        <button class="action-toggle w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-surface-700 text-surface-500 hover:text-primary-500">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <div class="absolute right-0 mt-2 hidden bg-white dark:bg-surface-800 border border-gray-200 dark:border-surface-700 rounded-lg shadow-md z-10 action-menu min-w-[140px]">
+          <button class="block w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-surface-700 text-sm edit-btn">Rediģēt</button>
+          <button class="block w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-surface-700 text-sm delete-btn">Dzēst</button>
+          <button class="block w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-surface-700 text-sm share-btn">Dalīties</button>
+        </div>
+      </div>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400 pl-6">${label}</p>
+  `;
+  const toggleBtn = el.querySelector('.action-toggle');
+  const actionMenu = el.querySelector('.action-menu');
+  const nameLink = el.querySelector('.calendar-name');
+
+toggleBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.querySelectorAll('.action-menu').forEach(menu => {
+    if (menu !== actionMenu) menu.classList.add('hidden');
   });
+  actionMenu?.classList.toggle('hidden');
+});
+
+  document.addEventListener('click', (e) => {
+    if (!el.contains(e.target)) actionMenu?.classList.add('hidden');
+  });
+
+el.querySelector('.edit-btn')?.addEventListener('click', () => {
+  editingCalendarId = calendar._id;
+  document.getElementById('editCalendarName').value = calendar.name;
+  document.getElementById('editCalendarColor').value = calendar.color;
+  document.getElementById('editModalCalendarName').textContent = `"${calendar.name}"`;
+  updateColorButtons('.edit-color-btn', document.getElementById('editCalendarColor'));
+  toggleModal(document.getElementById('editCalendarModal'), true);
+});
+
+  el.querySelector('.delete-btn')?.addEventListener('click', async () => {
+showConfirmationModal({
+  title: 'Dzēst kalendāru?',
+  message: `Vai tiešām vēlaties dzēst "${calendar.name}"?`,
+  onConfirm: async () => {
+    const res = await fetch(`/api/kalendars/${calendar._id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    if (res.ok) fetchCalendars();
+    else alert('Dzēšana neizdevās.');
+  }
+});
+  });
+
+el.querySelector('.share-btn')?.addEventListener('click', () => {
+  sharingCalendar = calendar._id;
+  toggleModal(document.getElementById('shareCalendarModal'), true);
+  document.getElementById('shareModalCalendarName').textContent = `"${calendar.name}"`;
+  loadSharedUsers(calendar._id);
+});
+
+
+  nameLink?.addEventListener('click', () => {
+    window.location.href = `/kalendars/${calendar._id}`;
+  });
+
+  return el;
+}
+
+async function loadSharedUsers(calendarId) {
+  const res = await fetch(`/api/kalendars/${calendarId}`, {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  if (!res.ok) return;
+
+  const calendar = await res.json();
+  const list = document.getElementById('sharedUsersList');
+  const currentUserId = user._id;
+  const searchInput = document.getElementById('sharedUsersSearch');
+
+  if (!list || !searchInput) return;
+
+  // Render all users first
+  renderSharedUsers(calendar.sharedWith, '', list, currentUserId, calendar);
+
+  // Clone search input to reset old listeners
+  const newSearch = searchInput.cloneNode(true);
+  searchInput.replaceWith(newSearch);
+
+  newSearch.addEventListener('input', () => {
+    const term = newSearch.value.trim().toLowerCase();
+    renderSharedUsers(calendar.sharedWith, term, list, currentUserId, calendar);
+
+let pendingRemoveUserId = null;
+let pendingRemoveIdentifier = null;
+let pendingRemoveCalendarId = null;
+
+list.querySelectorAll('.remove-user-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const userId = btn.dataset.user;
+    const sharedEntry = calendar.sharedWith.find(sw => sw.user._id === userId);
+    if (!sharedEntry) return;
+
+    const identifier = sharedEntry.user.email || sharedEntry.user.username;
+    if (!identifier) return;
+
+    showConfirmationModal({
+      title: 'Noņemt lietotāju?',
+      message: `Vai tiešām vēlaties noņemt "${identifier}" no šī kalendāra?`,
+      onConfirm: async () => {
+        await fetch(`/api/kalendars/${calendar._id}/share`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({ identifier })
+        });
+        await loadSharedUsers(calendar._id);
+        await fetchCalendars();
+      }
+    });
+  });
+});
+  });
+}
+
+
+
+
+function updateColorButtons(selector, hiddenInput) {
+  document.querySelectorAll(selector).forEach(btn => {
+    btn.classList.remove('ring-2', 'ring-primary-500');
+    if (btn.dataset.color === hiddenInput.value) {
+      btn.classList.add('ring-2', 'ring-primary-500');
+    }
+    btn.addEventListener('click', () => {
+      hiddenInput.value = btn.dataset.color;
+      updateColorButtons(selector, hiddenInput);
+    });
+  });
+}
+
+function toggleModal(modal, show) {
+  if (!modal) return;
+  const panel = modal.querySelector('.transform');
+  if (show) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      panel?.classList.remove('translate-x-full');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+  } else {
+    panel?.classList.add('translate-x-full');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 300);
+  }
+}
+
+
+
+function setupFilterHandlers() {
+  document.getElementById('searchBar')?.addEventListener('input', renderCalendarList);
+  document.getElementById('sortCalendars')?.addEventListener('change', renderCalendarList);
+}
+
+async function fetchCalendars() {
+  const token = localStorage.getItem('token');
+  const res = await fetch('/api/kalendars', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  if (res.ok) {
+    allCalendars = await res.json();
+    createFilterButtons();
+    renderCalendarList();
+  }
+}
+
+function setupCalendarCreation() {
+  const saveBtn = document.getElementById('saveCalendar');
+  const cancelBtn = document.getElementById('cancelCreate');
+  const nameInput = document.getElementById('calendarName');
+  const colorInput = document.getElementById('calendarColor');
+
+  updateColorButtons('.color-btn', colorInput);
+
+  cancelBtn?.addEventListener('click', () => toggleModal(document.getElementById('calendarModal'), false));
+
+  saveBtn?.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    const color = colorInput.value;
+    if (!name) return alert('Lūdzu ievadiet kalendāra nosaukumu.');
+    const res = await fetch('/api/kalendars', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ name, color })
+    });
+    if (res.ok) {
+      toggleModal(document.getElementById('calendarModal'), false);
+      await fetchCalendars();
+      nameInput.value = '';
+      colorInput.value = '#3b82f6';
+      updateColorButtons('.color-btn', colorInput);
+    } else {
+      alert('Neizdevās izveidot kalendāru.');
+    }
+  });
+}
+
+function setupCalendarEditing() {
+  const saveEditBtn = document.getElementById('saveEditCalendar');
+  const cancelEditBtn = document.getElementById('cancelEdit');
+  const nameInput = document.getElementById('editCalendarName');
+  const colorInput = document.getElementById('editCalendarColor');
+
+  updateColorButtons('.edit-color-btn', colorInput);
+
+  cancelEditBtn?.addEventListener('click', () => toggleModal(document.getElementById('editCalendarModal'), false));
+
+  saveEditBtn?.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    const color = colorInput.value;
+    if (!name || !editingCalendarId) return;
+    const res = await fetch(`/api/kalendars/${editingCalendarId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ name, color })
+    });
+    if (res.ok) {
+      toggleModal(document.getElementById('editCalendarModal'), false);
+      await fetchCalendars();
+    } else {
+      alert('Neizdevās saglabāt izmaiņas.');
+    }
+  });
+}
+
+function setupCalendarSharing() {
+  const shareEmail = document.getElementById('shareEmail');
+  const shareBtn = document.getElementById('addShareUser');
+  const errorDisplay = document.getElementById('shareError');
+
+  shareBtn?.addEventListener('click', async () => {
+    const identifier = shareEmail.value.trim();
+    if (!identifier || !sharingCalendar) return;
+
+    // ✅ Collect checked permission values
+    const permissions = {
+      edit: document.getElementById('permEdit').checked,
+      delete: document.getElementById('permDelete').checked,
+      rename: document.getElementById('permRename').checked,
+      addEvent: document.getElementById('permAddEvent').checked,
+      deleteEvent: document.getElementById('permDeleteEvent').checked,
+      editEvent: document.getElementById('permEditEvent').checked,
+    };
+
+    // ✅ Send identifier and permissions to backend
+    const res = await fetch(`/api/kalendars/${sharingCalendar}/share`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ identifier, permissions })
+    });
+
+    if (res.ok) {
+      shareEmail.value = '';
+      errorDisplay.classList.add('hidden');
+      await loadSharedUsers(sharingCalendar);
+      await fetchCalendars();
+    } else {
+      const { error } = await res.json();
+      errorDisplay.textContent = error || 'Neizdevās pievienot lietotāju.';
+      errorDisplay.classList.remove('hidden');
+    }
+  });
+}
+
+
+function setupUIHandlers() {
+  // Logout
+  document.getElementById('logoutButton')?.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  });
+
+  // Open "Add Calendar" modal
+  document.getElementById('addCalendar')?.addEventListener('click', () => {
+    toggleModal(document.getElementById('calendarModal'), true);
+  });
+
+  // Close modals via close buttons (e.g. #closeShareModal)
+document.querySelectorAll('[id^="close"]')?.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const modalId = btn.getAttribute('data-modal');
+    const modal = document.getElementById(modalId);
+    toggleModal(modal, false);
+  });
+});
+
+
+  // Close modals when clicking outside the modal panel (backdrop)
+  window.addEventListener('click', (e) => {
+    document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+      if (e.target === modal) {
+        toggleModal(modal, false);
+      }
+    });
+  });
+
+  setupCalendarCreation();
+  setupCalendarEditing();
+  setupCalendarSharing();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  user = await ensureAuthenticated();
+  if (!user) return;
+  setupUIHandlers();
+  setupFilterHandlers();
+  await fetchCalendars();
+});
+
+document.getElementById('cancelRemoveUser')?.addEventListener('click', () => {
+  document.getElementById('confirmRemoveUserModal').classList.add('hidden');
+  document.body.style.overflow = '';
+});

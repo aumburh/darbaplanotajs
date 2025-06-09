@@ -20,10 +20,9 @@ router.get("/", auth, async (req, res) => {
 // Get a single calendar (with shared users populated)
 router.get("/:id", auth, async (req, res) => {
   try {
-    const calendar = await Calendar.findById(req.params.id).populate(
-      "sharedWith.user",
-      "email username"
-    );
+      const calendar = await Calendar.findById(req.params.id)
+       .populate("sharedWith.user", "email username")
+        .populate("owner", "email username"); // <-- svarīgi
     if (!calendar)
       return res.status(404).json({ message: "Calendar not found" });
     res.json(calendar);
@@ -48,10 +47,11 @@ router.post("/", auth, async (req, res) => {
 
 // Share calendar with another user (by email or username)
 router.post("/:id/share", auth, async (req, res) => {
+  console.log("POST /:id/share route hit");
   try {
     const { identifier, permissions } = req.body;
     const calendar = await Calendar.findById(req.params.id);
-    if (!calendar) return res.status(404).json({ error: "Calendar not found" });
+    if (!calendar) return res.status(404).json({ error: "Kalendārs nav atrasts" });
     if (String(calendar.owner) !== req.user.id)
       return res.status(403).json({ error: "No permission" });
 
@@ -59,7 +59,7 @@ router.post("/:id/share", auth, async (req, res) => {
     const userToShare = await User.findOne({
       $or: [{ email: identifier }, { username: identifier }],
     });
-    if (!userToShare) return res.status(404).json({ error: "User not found" });
+    if (!userToShare) return res.status(404).json({ error: "Lietotājs nav atrasts" });
 
     // Prevent duplicate sharing
     if (
@@ -67,7 +67,7 @@ router.post("/:id/share", auth, async (req, res) => {
         (sw) => String(sw.user) === String(userToShare._id)
       )
     ) {
-      return res.status(400).json({ error: "Already shared with this user" });
+      return res.status(400).json({ error: "Šis lietotājs jau ir pievienots kalendāram" });
     }
 
     calendar.sharedWith.push({

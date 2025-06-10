@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
             adjustPopupPositions();
             popup.classList.remove('opacity-0', 'translate-y-[-20px]');
             popup.classList.add('opacity-100', 'translate-y-0');
-        }, 50); // Slight delay to ensure DOM updates
+        }, 50);
         
         // Auto-dismiss with slide-down and fade-out
         setTimeout(() => {
@@ -196,8 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     showPopup('Nepareizs e-pasts/lietotājvārds vai parole', 'error');
                 }
-            } catch {
-                showPopup('Servera kļūda', 'error');
+            } catch (err) {
+                showError('login-container', 'Servera kļūda');
             }
         });
     }
@@ -220,6 +220,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const terms = document.getElementById('terms');
             let isValid = true;
 
+            // Validate password strength requirements
+            const passwordStrength = {
+                length: email.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                number: /\d/.test(password)
+            };
+
+            if (!passwordStrength.length) {
+                showError('reg-password', 'Parolei jābūt vismaz 8 rakstzīmēm');
+                isValid = false;
+            }
+            if (!passwordStrength.uppercase) {
+                showError('reg-password', 'Parolei jābūt vismaz vienam lielajam burtam');
+                isValid = false;
+            }
+            if (!passwordStrength.number) {
+                showError('reg-password', 'Parolei jābūt vismaz vienam ciparam');
+                isValid = false;
+            }
+
             if (!email) {
                 showError('reg-email', 'Lūdzu ievadiet e-pastu');
                 isValid = false;
@@ -238,9 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!password) {
                 showError('reg-password', 'Lūdzu ievadiet paroli');
-                isValid = false;
-            } else if (password.length < 8) {
-                showError('reg-password', 'Parolei jābūt vismaz 8 rakstzīmēm');
                 isValid = false;
             }
 

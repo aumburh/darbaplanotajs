@@ -1,62 +1,226 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lv">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="author" content="Rainers">
-    <meta name="last-modified-by" content="Rainers">
-    <meta name="last-modified" content="2025-05-25">
-    <title>Login - Darba Planotājs</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../style/login.css">
-    <link rel="icon" type="image/png" href="/images/FAV.png">
+  <meta charset="UTF-8" />
+  <meta name="author" content="Rainers" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pieslēgšanās – Darba Plānotājs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    .form-transition {
+      transition: all 0.3s ease;
+    }
+    
+    .input-error {
+      border-color: #ef4444 !important;
+    }
+    
+    .error-message {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #9ca3af;
+    }
+    
+    .password-toggle:hover {
+      color: #6b7280;
+    }
+  </style>
 </head>
 
-<body>
-    <div class="login-container" id="login-container">
-        <h2>Pieslēgties</h2>
-        <div class="error-message" id="login-error"></div>
-        <form id="login-form" autocomplete="off">
-            <div class="form-group">
-                <label for="login-identifier">E-pasts vai lietotājvārds</label>
-                <input type="text" id="login-identifier" name="login-identifier" required autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="login-password">Parole</label>
-                <input type="password" id="login-password" name="login-password" required
-                    autocomplete="current-password">
-            </div>
-            <button type="submit" class="login-btn">Pieslēgties</button>
-        </form>
-        <a href="#" class="register-link" id="show-register">Nav konta? Reģistrēties</a>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-8 transition-all duration-300 animate-fade-in" id="card">
+    <!-- Logo Header -->
+    <div class="flex justify-center mb-6">
+      <div class="flex items-center">
+        <i class="fas fa-calendar-days text-primary-600 dark:text-primary-400 text-3xl mr-3"></i>
+        <h1 class="text-2xl font-bold text-primary-600 dark:text-primary-400">Darba Plānotājs</h1>
+      </div>
+    </div>
+    
+    <!-- Login Form -->
+    <div id="login-form" class="space-y-6 form-transition">
+      <h2 class="text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">Pieslēgties</h2>
+      
+      <form class="space-y-4" id="loginForm">
+        <div>
+          <label for="login-identifier" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-pasts vai lietotājvārds</label>
+          <div class="relative">
+            <input type="text" id="login-identifier" required autocomplete="username"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition" />
+          </div>
+          <p id="login-identifier-error" class="error-message hidden"></p>
+        </div>
+        
+        <div>
+          <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parole</label>
+          <div class="relative">
+            <input type="password" id="login-password" required autocomplete="new-password"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition pr-10" />
+            <i class="fas fa-eye password-toggle" id="toggle-login-password"></i>
+          </div>
+          <p id="login-password-error" class="error-message hidden"></p>
+        </div>
+        
+        <button type="submit"
+          class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+          <i class="fas fa-sign-in-alt"></i>
+          Pieslēgties
+        </button>
+      </form>
+      
+      <div class="relative flex items-center py-4">
+        <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        <span class="flex-shrink mx-4 text-gray-500 dark:text-gray-400 text-sm">VAI</span>
+        <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+      </div>
+      
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+        Nav konta?
+        <button id="to-register" class="text-primary-600 hover:underline dark:text-primary-400">Reģistrēties</button>
+      </p>
     </div>
 
-    <div class="login-container" id="register-container" style="display:none;">
-        <h2>Reģistrēties</h2>
-        <div class="error-message" id="register-error"></div>
-        <form id="register-form" autocomplete="off">
-            <div class="form-group">
-                <label for="reg-email">E-pasts</label>
-                <input type="email" id="reg-email" name="reg-email" required autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="reg-username">Lietotājvārds</label>
-                <input type="text" id="reg-username" name="reg-username" required autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="reg-password">Parole</label>
-                <input type="password" id="reg-password" name="reg-password" required autocomplete="new-password">
-            </div>
-            <div class="form-group">
-                <label for="reg-password2">Apstipriniet paroli</label>
-                <input type="password" id="reg-password2" name="reg-password2" required autocomplete="new-password">
-            </div>
-            <button type="submit" class="login-btn">Reģistrēties</button>
-        </form>
-        <a href="#" class="register-link" id="show-login">Jau ir konts? Pieslēgties</a>
+    <!-- Register Form -->
+    <div id="register-form" class="space-y-6 form-transition hidden">
+      <h2 class="text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">Reģistrēties</h2>
+      
+      <form class="space-y-4" id="registerForm">
+        <div>
+          <label for="reg-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-pasts</label>
+          <div class="relative">
+            <input type="email" id="reg-email" required
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition" />
+          </div>
+          <p id="reg-email-error" class="error-message hidden"></p>
+        </div>
+        
+        <div>
+          <label for="reg-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lietotājvārds</label>
+          <div class="relative">
+            <input type="text" id="reg-username" required autocomplete="username"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition" />
+          </div>
+          <p id="reg-username-error" class="error-message hidden"></p>
+        </div>
+        
+        <div>
+          <label for="reg-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parole</label>
+          <div class="relative">
+            <input type="password" id="reg-password" required autocomplete="new-password"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition pr-10" />
+            <i class="fas fa-eye password-toggle" id="toggle-reg-password"></i>
+          </div>
+          <p id="reg-password-error" class="error-message hidden"></p>
+          <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <p>Parolei jābūt vismaz 8 simbolus garai un jāsatur:</p>
+            <ul class="list-disc pl-5 mt-1">
+              <li class="password-requirement" data-requirement="length">Vismaz 8 rakstzīmes</li>
+              <li class="password-requirement" data-requirement="uppercase">Vismaz 1 lielais burts</li>
+              <li class="password-requirement" data-requirement="number">Vismaz 1 cipars</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div>
+          <label for="reg-password2" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Apstipriniet paroli</label>
+          <div class="relative">
+            <input type="password" id="reg-password2" required autocomplete="new-password"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition pr-10" />
+            <i class="fas fa-eye password-toggle" id="toggle-reg-password2"></i>
+          </div>
+          <p id="reg-password2-error" class="error-message hidden"></p>
+        </div>
+        
+        <div class="flex items-center">
+          <input id="terms" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" required>
+          <label for="terms" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            Piekrītu noteikumiem</a>
+          </label>
+        </div>
+        
+        <button type="submit"
+          class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+          <i class="fas fa-user-plus"></i>
+          Reģistrēties
+        </button>
+      </form>
+      
+      <div class="relative flex items-center py-4">
+        <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        <span class="flex-shrink mx-4 text-gray-500 dark:text-gray-400 text-sm">VAI</span>
+        <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+      </div>
+      
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+        Jau ir konts?
+        <button id="to-login" class="text-primary-600 hover:underline dark:text-primary-400">Pieslēgties</button>
+      </p>
     </div>
+  </div>
 
-    <script src="../script/login.js"></script>
+  <script src="../script/login.js"></script>
 </body>
-
 </html>

@@ -1,144 +1,106 @@
-/*
-  Author: Rainers
-  Last Modified By: Rainers
-  Last Modified: 2025-05-25
-*/ 
- 
- :root {
-            --bg: #181c24;
-            --container-bg: #232836;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --input-bg: #232836;
-            --input-border: #353b4a;
-            --input-focus: #2563eb;
-            --text: #e5e7ef;
-            --label: #b2b8c6;
-            --error-bg: #2d1b1b;
-            --error-text: #f87171;
-            --link: #60a5fa;
-        }
+/* Reset & Font */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to right, #eef2f3, #cfd9df);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+/* Main Container */
+.container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
 
-        body {
-            background: var(--bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+/* Card Design */
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 30px 25px;
+  transition: all 0.3s ease;
+}
 
-        .login-container {
-            background: var(--container-bg);
-            padding: 2.2rem 1.7rem;
-            border-radius: 14px;
-            box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 0.18);
-            width: 100%;
-            max-width: 340px;
-            transition: box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
+/* Form Wrapper */
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fadeIn 0.4s ease;
+}
+.form-wrapper.hidden {
+  display: none;
+}
 
-        .login-container h2 {
-            margin-bottom: 1.2rem;
-            text-align: center;
-            color: var(--text);
-            font-weight: 600;
-            letter-spacing: 0.01em;
-        }
+/* Headings */
+h2 {
+  text-align: center;
+  font-weight: 600;
+  color: #333;
+}
 
-        .form-group {
-            margin-bottom: 1.1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
+/* Inputs & Button */
+input {
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s ease;
+}
+input:focus {
+  border-color: #3498db;
+}
 
-        label {
-            margin-bottom: 0.35rem;
-            color: var(--label);
-            font-size: 0.97rem;
-            letter-spacing: 0.01em;
-        }
+button {
+  background: #3498db;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+button:hover {
+  background: #2980b9;
+}
 
-        input[type="email"],
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            padding: 0.7rem;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            font-size: 1rem;
-            color: var(--text);
-            outline: none;
-            transition: border 0.2s, background 0.2s;
-            box-sizing: border-box;
-        }
+/* Toggle text */
+.toggle-text {
+  text-align: center;
+  font-size: 14px;
+}
+.toggle-text span {
+  color: #3498db;
+  cursor: pointer;
+  text-decoration: underline;
+}
 
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        input[type="text"]:focus {
-            border-color: var(--input-focus);
-            background: #232d41;
-        }
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-        .login-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.05rem;
-            cursor: pointer;
-            font-weight: 500;
-            letter-spacing: 0.01em;
-            transition: background 0.2s;
-        }
-
-        .login-btn:hover {
-            background: var(--primary-hover);
-        }
-
-        .error-message {
-            color: var(--error-text);
-            background: var(--error-bg);
-            padding: 0.7rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            font-size: 0.97rem;
-            display: none;
-        }
-
-        .register-link {
-            display: block;
-            text-align: center;
-            margin-top: 1.1rem;
-            color: var(--link);
-            text-decoration: none;
-            font-size: 0.97rem;
-            transition: color 0.2s;
-        }
-
-        .register-link:hover {
-            color: var(--primary);
-            text-decoration: underline;
-        }
-
-        @media (max-width: 500px) {
-            .login-container {
-                padding: 1.3rem 0.7rem;
-                max-width: 98vw;
-            }
-        }
+/* Responsive */
+@media (max-width: 480px) {
+  .card {
+    padding: 25px 20px;
+  }
+}
